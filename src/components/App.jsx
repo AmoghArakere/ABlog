@@ -10,7 +10,9 @@ export default function App({ children }) {
   useEffect(() => {
     // Initialize sample data when the app loads
     if (!initialized) {
+      console.log('Initializing sample data...');
       initializeSampleData();
+      console.log('Sample data initialized!');
       setInitialized(true);
     }
   }, [initialized]);

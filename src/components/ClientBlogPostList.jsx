@@ -36,8 +36,7 @@ export default function ClientBlogPostList({
     const fetchPosts = async () => {
       try {
         setLoading(true);
-
-        const { posts: fetchedPosts, totalPages: pages } = await blogService.getPosts({
+        console.log('Fetching posts with params:', {
           page,
           limit: postsPerPage,
           category: selectedCategory,
@@ -46,6 +45,19 @@ export default function ClientBlogPostList({
           search: searchResults ? searchTerm : null
         });
 
+        const result = await blogService.getPosts({
+          page,
+          limit: postsPerPage,
+          category: selectedCategory,
+          tag,
+          authorId,
+          search: searchResults ? searchTerm : null
+        });
+
+        console.log('Posts result:', result);
+        const { posts: fetchedPosts, totalPages: pages } = result;
+
+        console.log('Fetched posts:', fetchedPosts);
         setPosts(fetchedPosts);
         setTotalPages(pages);
         setLoading(false);

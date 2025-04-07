@@ -1,5 +1,3 @@
-import emailService from './emailService';
-
 // Generate a random ID
 const generateId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
@@ -145,36 +143,21 @@ const authService = {
       users[userIndex].resetTokenExpires = resetTokenExpires.toISOString();
       setToStorage('users', JSON.stringify(users));
 
-      // Create the reset link
+      // In a real app, you would send an email with a reset link
+      // For this demo, we'll just log the reset link
       const resetLink = `${window.location.origin}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+      console.log(`Password reset link for ${email}:`, resetLink);
 
-      // Send the password reset email
-      const emailResult = await emailService.sendPasswordResetEmail(email, resetLink);
+      // For demo purposes, we'll also store the most recent reset link in localStorage
+      // so we can easily access it for testing
+      setToStorage('latestResetLink', resetLink);
 
-      if (emailResult.success) {
-        console.log(`Password reset email sent to ${email}`);
-
-        // If using Ethereal for testing, provide the preview URL
-        if (emailResult.previewURL) {
-          console.log('Email preview URL:', emailResult.previewURL);
-          return {
-            success: true,
-            message: 'Password reset instructions have been sent to your email. Please check your inbox.',
-            previewURL: emailResult.previewURL
-          };
-        }
-
-        return {
-          success: true,
-          message: 'Password reset instructions have been sent to your email. Please check your inbox.'
-        };
-      } else {
-        console.error('Failed to send password reset email:', emailResult.error);
-        return {
-          success: false,
-          error: 'Failed to send password reset email. Please try again later.'
-        };
-      }
+      return {
+        success: true,
+        // Include the reset link in the response for demo purposes
+        // In a real app, you would not return this to the client
+        resetLink: resetLink
+      };
     } catch (error) {
       console.error('Error resetting password:', error);
       return { success: false, error: 'An unexpected error occurred' };
