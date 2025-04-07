@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600">
+  <rect width="1200" height="600" fill="#1e293b" />
+  <text x="600" y="300" font-family="Arial, sans-serif" font-size="48" fill="#f3f4f6" text-anchor="middle" dominant-baseline="middle">Cover Image Placeholder</text>
+  <rect x="0" y="0" width="1200" height="600" fill="url(#gradient)" fill-opacity="0.2" />
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4" />
+      <stop offset="50%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#7e22ce" />
+    </linearGradient>
+  </defs>
+</svg>

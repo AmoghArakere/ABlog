@@ -1,22 +1,47 @@
+---
+import '../styles/global.css';
+import '../styles/blog-content.css';
+import App from '../components/App';
+import Footer from '../components/Footer';
+import NavigationWrapper from '../components/NavigationWrapper';
+import DataFixer from '../components/DataFixer';
+import PageTransitionWrapper from '../components/PageTransitionWrapper';
+
+interface Props {
+	title?: string;
+	description?: string;
+}
+
+const { title = 'ABlog - A Modern Blogging Platform', description = 'A comprehensive blogging platform with rich features' } = Astro.props;
+---
+
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark" style="color-scheme: dark;">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<meta name="description" content={description} />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+		<title>{title}</title>
 	</head>
 	<body>
-		<slot />
+		<DataFixer client:load />
+		<App client:load>
+			<div class="min-h-screen flex flex-col">
+				<NavigationWrapper client:load />
+
+				<main class="flex-grow container mx-auto px-4 py-8">
+					<PageTransitionWrapper client:load>
+						<slot />
+					</PageTransitionWrapper>
+				</main>
+
+				<Footer client:load />
+			</div>
+		</App>
 	</body>
 </html>
-
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>

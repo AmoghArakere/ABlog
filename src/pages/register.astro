@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ClientRegisterForm from '../components/ClientRegisterForm';
+---
+
+<Layout title="Register - ABlog" description="Create a new ABlog account">
+    <section class="py-12">
+        <div class="container mx-auto px-4 max-w-md">
+            <ClientRegisterForm client:only="react" />
+        </div>
+    </section>
+</Layout>

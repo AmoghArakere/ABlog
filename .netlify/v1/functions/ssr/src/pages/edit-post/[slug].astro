@@ -1,0 +1,18 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ClientEditPostForm from '../../components/ClientEditPostForm';
+
+// Set this route to be server-rendered instead of statically generated
+export const prerender = false;
+
+// Get the slug from the URL parameters
+const { slug } = Astro.params;
+console.log('Server-side slug parameter:', slug);
+---
+
+<Layout title="Edit Post - ABlog" description="Edit your blog post">
+  <div class="max-w-4xl mx-auto py-8">
+    <h1 class="text-3xl font-bold mb-8">Edit Post</h1>
+    <ClientEditPostForm client:load slug={slug} />
+  </div>
+</Layout>

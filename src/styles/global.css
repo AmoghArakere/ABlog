@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Page transition animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { opacity: 0; transform: translateX(-100%) skewX(-20deg); }
+  50% { opacity: 0.4; }
+  100% { opacity: 0; transform: translateX(0) skewX(-20deg); }
+}
+
+.page-enter {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.page-content {
+  animation: slideUp 0.4s ease-out forwards;
+}
+
+/* Grid pattern background */
+.bg-grid-white {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.05)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+}
+
+/* Custom base styles */
+@layer base {
+  body {
+    @apply bg-black text-text-dark font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold text-text-dark;
+  }
+  h1 {
+    @apply text-4xl md:text-5xl mb-6;
+  }
+  h2 {
+    @apply text-3xl md:text-4xl mb-4;
+  }
+  h3 {
+    @apply text-2xl md:text-3xl mb-3;
+  }
+  a {
+    @apply text-blue-400 hover:text-blue-300 transition-colors;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes bounce-slow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Custom component styles */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-md font-medium transition-colors;
+  }
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-dark;
+  }
+  .btn-secondary {
+    @apply bg-secondary text-white hover:bg-secondary-dark;
+  }
+  .btn-outline {
+    @apply border border-gray-700 hover:bg-gray-800 text-gray-300 hover:text-white;
+  }
+  .card {
+    @apply bg-gray-900 rounded-lg shadow-card overflow-hidden border border-gray-800;
+  }
+  .form-input {
+    @apply w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-800 text-white;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  .badge-primary {
+    @apply bg-primary-light text-primary-dark dark:bg-blue-900 dark:text-blue-300;
+  }
+}

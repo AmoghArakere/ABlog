@@ -1,0 +1,19 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import ClientBlogPost from '../../components/ClientBlogPost';
+import { blogService } from '../../lib/localStorageService';
+
+// Set this route to be server-rendered instead of statically generated
+export const prerender = false;
+
+// Get the slug from the URL parameters
+const { slug } = Astro.params;
+---
+
+<Layout title="Blog Post - ABlog" description="Read this blog post on ABlog">
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <ClientBlogPost slug={slug} client:only="react" />
+        </div>
+    </section>
+</Layout>

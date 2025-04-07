@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ClientCreatePostForm from '../components/ClientCreatePostForm';
+---
+
+<Layout title="Create New Post - ABlog" description="Write and publish a new blog post on ABlog">
+    <section class="py-12">
+        <div class="container mx-auto px-4 max-w-4xl">
+            <ClientCreatePostForm client:only="react" />
+        </div>
+    </section>
+</Layout>

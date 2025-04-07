@@ -1,0 +1,15 @@
+---
+import Layout from '../layouts/Layout.astro';
+import DirectEditForm from '../components/DirectEditForm';
+
+// Set this route to be server-rendered
+export const prerender = false;
+---
+
+<Layout title="Direct Edit - ABlog" description="Edit your blog post directly">
+  <div class="max-w-4xl mx-auto py-8">
+    <h1 class="text-3xl font-bold mb-8 dark:text-white">Direct Edit</h1>
+    <p class="mb-4 text-gray-600 dark:text-gray-300">This is a simplified editor that directly accesses your posts.</p>
+    <DirectEditForm client:load />
+  </div>
+</Layout>
