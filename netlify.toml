@@ -10,8 +10,8 @@
   port = 4321
   targetPort = 4321
 
-# Redirect all routes to index.html for SPA routing
+# Handle 404s in SSR mode
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/entry-server"
+  to = "/.netlify/functions/entry"
   status = 200

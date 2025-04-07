@@ -8,5 +8,10 @@ import netlify from '@astrojs/netlify';
 export default defineConfig({
   integrations: [tailwind(), react()],
   output: 'server',
-  adapter: netlify()
+  adapter: netlify({
+    // Specify the function directory
+    functionPerRoute: true,
+    // Specify the function name
+    functionName: 'entry'
+  })
 });
