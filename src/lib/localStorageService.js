@@ -510,11 +510,33 @@ export const profileService = {
     try {
       console.log('updateProfile called with:', {
         userId,
+        username,
+        full_name,
+        bio,
         avatar_url: avatar_url ? (typeof avatar_url === 'string' ? `${avatar_url.substring(0, 30)}...` : '[non-string value]') : null,
-        cover_image: cover_image ? (typeof cover_image === 'string' ? `${cover_image.substring(0, 30)}...` : '[non-string value]') : null
+        cover_image: cover_image ? (typeof cover_image === 'string' ? `${cover_image.substring(0, 30)}...` : '[non-string value]') : null,
+        website,
+        location
       });
 
+      // Check if avatar_url and cover_image are valid URLs or data URLs
+      if (avatar_url) {
+        console.log('Avatar URL type:', typeof avatar_url);
+        console.log('Avatar URL is data URL?', avatar_url.startsWith('data:'));
+        console.log('Avatar URL is http URL?', avatar_url.startsWith('http'));
+        // For data URLs, we'll just use them directly
+      }
+
+      if (cover_image) {
+        console.log('Cover image type:', typeof cover_image);
+        console.log('Cover image is data URL?', cover_image.startsWith('data:'));
+        console.log('Cover image is http URL?', cover_image.startsWith('http'));
+        // For data URLs, we'll just use them directly
+      }
+
       const users = JSON.parse(getFromStorage('users'));
+      console.log(`Found ${users.length} users in storage`);
+
       const userIndex = users.findIndex(user => user.id === userId);
 
       if (userIndex === -1) {
@@ -537,12 +559,18 @@ export const profileService = {
       if (avatar_url) {
         console.log('Using avatar URL:', avatar_url.substring(0, 50) + '...');
         processedAvatarUrl = avatar_url;
+        console.log('Processed avatar URL:', processedAvatarUrl.substring(0, 50) + '...');
+      } else {
+        console.log('No avatar URL provided');
       }
 
       // Process cover image if it's provided
       if (cover_image) {
         console.log('Using cover image URL:', cover_image.substring(0, 50) + '...');
         processedCoverImage = cover_image;
+        console.log('Processed cover image:', processedCoverImage.substring(0, 50) + '...');
+      } else {
+        console.log('No cover image provided');
       }
 
       // Update user fields - only update fields that were provided

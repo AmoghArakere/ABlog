@@ -7,6 +7,7 @@ import ClientBlogPostCard from './ClientBlogPostCard';
 import ImageUploader from './ImageUploader';
 import ImageAdjuster from './ImageAdjuster';
 import CloudinaryUploader from './CloudinaryUploader';
+import DirectImageUploader from './DirectImageUploader';
 
 export default function ClientUserProfile({ username, isCurrentUser = false }) {
   const toast = useToastContext();
@@ -139,10 +140,15 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
+    console.log('handleUpdateProfile called');
 
-    if ((!user || user.id !== profile.id) && !isCurrentUser) return;
+    if ((!user || user.id !== profile.id) && !isCurrentUser) {
+      console.error('User not authorized to update this profile');
+      return;
+    }
 
     const formData = new FormData(e.target);
+    console.log('Form submitted with these elements:', [...formData.entries()]);
 
     // Get values from form - username is now fixed and cannot be changed
     const username = profile.username; // Use the existing username
@@ -152,6 +158,16 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     const cover_image = formData.get('cover_image');
     const website = formData.get('website');
     const location = formData.get('location');
+
+    console.log('Form values extracted:', {
+      username,
+      full_name,
+      bio,
+      avatar_url: avatar_url ? `${avatar_url.substring(0, 30)}...` : null,
+      cover_image: cover_image ? `${cover_image.substring(0, 30)}...` : null,
+      website,
+      location
+    });
 
     // Only include fields that have changed - username is excluded as it cannot be changed
     const updatedProfile = {};
@@ -166,25 +182,20 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     if (website !== profile.website) updatedProfile.website = website;
     if (location !== profile.location) updatedProfile.location = location;
 
-    console.log('Updating profile with:', updatedProfile);
+    console.log('Updating profile with:', {
+      ...updatedProfile,
+      avatar_url: updatedProfile.avatar_url ? `${updatedProfile.avatar_url.substring(0, 30)}...` : null,
+      cover_image: updatedProfile.cover_image ? `${updatedProfile.cover_image.substring(0, 30)}...` : null
+    });
 
     // Username changes are no longer possible
     const usernameChanged = false;
 
     try {
-      console.log('Submitting profile update with:', updatedProfile);
-      if (updatedProfile.avatar_url) {
-        console.log(`Avatar URL being submitted: ${updatedProfile.avatar_url.substring(0, 50)}...`);
-      }
-
       const result = await profileService.updateProfile(user.id, updatedProfile);
-      console.log('Profile update result:', result);
-
       if (result) {
         // Update the local profile state with the updated values
-        const newProfileState = { ...profile, ...updatedProfile };
-        console.log('Setting new profile state:', newProfileState);
-        setProfile(newProfileState);
+        setProfile({ ...profile, ...updatedProfile });
         toast.success('Profile updated successfully!');
 
         // Switch to the posts tab after successful update
@@ -470,43 +481,27 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                     <label htmlFor="avatar_upload" className="block text-sm font-medium mb-2 dark:text-blue-300">Profile Picture</label>
                     <input type="hidden" name="avatar_url" id="avatar_url" value={profile.avatar_url || ''} />
                     <div className="space-y-4">
-                      <CloudinaryUploader
+                      {/* Try the direct image uploader instead of Cloudinary */}
+                      <DirectImageUploader
                         onImageSelect={(imageUrl) => {
                           if (imageUrl) {
                             console.log('Profile picture selected:', imageUrl);
-                            // Set the image URL directly - no need for adjustment with Cloudinary
+                            // Set the image URL directly
                             const hiddenInput = document.getElementById('avatar_url');
-                            if (hiddenInput) {
-                              console.log(`Setting hidden input value to: ${imageUrl}`);
-                              hiddenInput.value = imageUrl;
-                              console.log(`Hidden input value after setting: ${hiddenInput.value}`);
-                            } else {
-                              console.error('Could not find avatar_url hidden input');
-                            }
+                            if (hiddenInput) hiddenInput.value = imageUrl;
 
                             // Update ONLY profile picture previews
                             const previewImg = document.querySelector('.preview-profile-pic');
                             if (previewImg) {
-                              console.log(`Updating preview image src to: ${imageUrl}`);
                               previewImg.src = imageUrl;
                               // Also update the profile picture in the header if it exists
                               const headerProfilePic = document.querySelector('.header-profile-pic');
-                              if (headerProfilePic) {
-                                console.log(`Updating header profile pic src to: ${imageUrl}`);
-                                headerProfilePic.src = imageUrl;
-                              } else {
-                                console.error('Could not find header-profile-pic element');
-                              }
-                            } else {
-                              console.error('Could not find preview-profile-pic element');
+                              if (headerProfilePic) headerProfilePic.src = imageUrl;
                             }
                           }
                         }}
                         buttonText="Upload Profile Picture"
                         initialImage={profile.avatar_url}
-                        aspectRatio={1}
-                        imageType="profile"
-                        uniqueId="profile-pic-uploader"
                       />
                       {profile.avatar_url && (
                         <div className="mt-2">
@@ -532,11 +527,12 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                     <label htmlFor="cover_image" className="block text-sm font-medium mb-2 dark:text-blue-300">Cover Image</label>
                     <input type="hidden" name="cover_image" id="cover_image" value={profile.cover_image || ''} />
                     <div className="space-y-4">
-                      <CloudinaryUploader
+                      {/* Try the direct image uploader instead of Cloudinary */}
+                      <DirectImageUploader
                         onImageSelect={(imageUrl) => {
                           if (imageUrl) {
                             console.log('Cover image selected:', imageUrl);
-                            // Set the image URL directly - no need for adjustment with Cloudinary
+                            // Set the image URL directly
                             const hiddenInput = document.getElementById('cover_image');
                             if (hiddenInput) hiddenInput.value = imageUrl;
 
@@ -552,9 +548,6 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                         }}
                         buttonText="Upload Cover Image"
                         initialImage={profile.cover_image}
-                        aspectRatio={3}
-                        imageType="cover"
-                        uniqueId="cover-image-uploader"
                       />
                       {profile.cover_image && (
                         <div className="mt-2">
