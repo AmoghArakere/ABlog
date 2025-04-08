@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import authService from '../lib/authService';
 import RichTextEditor from './RichTextEditor';
 import ImageUploader from './ImageUploader';
+import CloudinaryUploader from './CloudinaryUploader';
 import { blogService } from '../lib/localStorageService';
 
 export default function ClientCreatePostForm() {
@@ -101,11 +102,11 @@ export default function ClientCreatePostForm() {
 
     // Validate cover image if provided
     if (coverImage) {
-      console.log('Cover image data length:', coverImage.length);
+      console.log('Cover image URL:', coverImage);
 
-      // Check if the image data is valid
-      if (!coverImage.startsWith('data:image/')) {
-        setError('Invalid cover image format');
+      // Check if the image URL is valid
+      if (!coverImage.startsWith('http') && !coverImage.startsWith('data:image/') && !coverImage.startsWith('/images/')) {
+        setError('Invalid cover image URL');
         setLoading(false);
         return;
       }
@@ -226,12 +227,13 @@ export default function ClientCreatePostForm() {
         <div>
           <label htmlFor="coverImage" className="block text-sm font-medium mb-2 text-white">Cover Image</label>
           <div className="mb-4">
-            <ImageUploader
-              onImageSelect={(imageData) => {
-                console.log('Image selected, data length:', imageData ? imageData.length : 0);
-                setCoverImage(imageData);
+            <CloudinaryUploader
+              onImageSelect={(imageUrl) => {
+                console.log('Cloudinary image URL:', imageUrl);
+                setCoverImage(imageUrl);
               }}
               buttonText="Upload Cover Image"
+              initialImage={coverImage}
             />
           </div>
 

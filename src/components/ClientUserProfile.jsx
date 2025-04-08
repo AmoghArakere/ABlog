@@ -6,6 +6,7 @@ import { getImageUrl } from '../lib/imageUtils';
 import ClientBlogPostCard from './ClientBlogPostCard';
 import ImageUploader from './ImageUploader';
 import ImageAdjuster from './ImageAdjuster';
+import CloudinaryUploader from './CloudinaryUploader';
 
 export default function ClientUserProfile({ username, isCurrentUser = false }) {
   const toast = useToastContext();
@@ -438,15 +439,25 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                     <label htmlFor="avatar_upload" className="block text-sm font-medium mb-2 dark:text-blue-300">Profile Picture</label>
                     <input type="hidden" name="avatar_url" id="avatar_url" value={profile.avatar_url || ''} />
                     <div className="space-y-4">
-                      <ImageUploader
-                        onImageSelect={(imageData) => {
-                          if (imageData) {
-                            // Store the image temporarily for adjustment
-                            setTempProfilePic(imageData);
-                            setShowProfilePicAdjuster(true);
+                      <CloudinaryUploader
+                        onImageSelect={(imageUrl) => {
+                          if (imageUrl) {
+                            // Set the image URL directly - no need for adjustment with Cloudinary
+                            const hiddenInput = document.getElementById('avatar_url');
+                            if (hiddenInput) hiddenInput.value = imageUrl;
+
+                            // Update preview
+                            const previewImg = document.querySelector('.preview-profile-pic');
+                            if (previewImg) {
+                              previewImg.src = imageUrl;
+                              // Also update the profile picture in the header if it exists
+                              const headerProfilePic = document.querySelector('.header-profile-pic');
+                              if (headerProfilePic) headerProfilePic.src = imageUrl;
+                            }
                           }
                         }}
                         buttonText="Upload Profile Picture"
+                        initialImage={profile.avatar_url}
                       />
                       {profile.avatar_url && (
                         <div className="mt-2">
@@ -472,15 +483,25 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                     <label htmlFor="cover_image" className="block text-sm font-medium mb-2 dark:text-blue-300">Cover Image</label>
                     <input type="hidden" name="cover_image" id="cover_image" value={profile.cover_image || ''} />
                     <div className="space-y-4">
-                      <ImageUploader
-                        onImageSelect={(imageData) => {
-                          if (imageData) {
-                            // Store the image temporarily for adjustment
-                            setTempCoverImage(imageData);
-                            setShowCoverImageAdjuster(true);
+                      <CloudinaryUploader
+                        onImageSelect={(imageUrl) => {
+                          if (imageUrl) {
+                            // Set the image URL directly - no need for adjustment with Cloudinary
+                            const hiddenInput = document.getElementById('cover_image');
+                            if (hiddenInput) hiddenInput.value = imageUrl;
+
+                            // Update preview
+                            const previewImg = document.querySelector('.preview-cover-image');
+                            if (previewImg) {
+                              previewImg.src = imageUrl;
+                              // Also update the cover image in the header if it exists
+                              const headerCoverImg = document.querySelector('.header-cover-image');
+                              if (headerCoverImg) headerCoverImg.src = imageUrl;
+                            }
                           }
                         }}
                         buttonText="Upload Cover Image"
+                        initialImage={profile.cover_image}
                       />
                       {profile.cover_image && (
                         <div className="mt-2">

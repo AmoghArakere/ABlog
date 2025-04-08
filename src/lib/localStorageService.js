@@ -1,4 +1,5 @@
-import { processImageForStorage, getImageUrl } from './imageUtils';
+import { getImageUrl } from './imageUtils';
+import { uploadProfileImage, uploadCoverImage, uploadPostImage } from './cloudinaryService';
 
 // Generate a random ID
 const generateId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -284,12 +285,19 @@ export const blogService = {
         allTags.find(tag => tag.id === tagId)
       ).filter(Boolean);
 
-      // Process cover image if it's a base64 string
-      let processedCoverImage = cover_image;
-      if (cover_image && cover_image.startsWith('data:')) {
-        // For now, we're keeping the base64 data as is
-        // In a real app, you would upload this to a server and store the URL
-        console.log('Base64 image detected, using as is');
+      // Upload cover image to Cloudinary if provided
+      let cloudinaryCoverImage = cover_image;
+      if (cover_image) {
+        try {
+          console.log('Uploading post cover image to Cloudinary...');
+          const postId = generateId(); // Generate ID early for the upload
+          cloudinaryCoverImage = await uploadPostImage(cover_image, postId);
+          console.log('Post cover image upload result:', cloudinaryCoverImage);
+        } catch (error) {
+          console.error('Error uploading post cover image to Cloudinary:', error);
+          // Keep the original URL if upload fails
+          cloudinaryCoverImage = cover_image;
+        }
       }
 
       // Process content to preserve line breaks
@@ -313,7 +321,7 @@ export const blogService = {
         slug,
         content: processedContent,
         excerpt: excerpt || title.substring(0, 150) + '...',
-        cover_image: processedCoverImage,
+        cover_image: cloudinaryCoverImage,
         author_id,
         categories: postCategories,
         tags: postTags,
@@ -365,14 +373,18 @@ export const blogService = {
       }
       if (excerpt) post.excerpt = excerpt;
 
-      // Process cover image if it's a base64 string
-      if (cover_image) {
-        if (cover_image.startsWith('data:')) {
-          // For now, we're keeping the base64 data as is
-          // In a real app, you would upload this to a server and store the URL
-          console.log('Base64 image detected in update, using as is');
+      // Upload cover image to Cloudinary if provided
+      if (cover_image && cover_image !== post.cover_image) {
+        try {
+          console.log('Uploading updated post cover image to Cloudinary...');
+          const cloudinaryCoverImage = await uploadPostImage(cover_image, post.id);
+          console.log('Updated post cover image upload result:', cloudinaryCoverImage);
+          post.cover_image = cloudinaryCoverImage;
+        } catch (error) {
+          console.error('Error uploading updated post cover image to Cloudinary:', error);
+          // Keep the original URL if upload fails
+          post.cover_image = cover_image;
         }
-        post.cover_image = cover_image;
       }
 
       if (status) post.status = status;
@@ -522,31 +534,31 @@ export const profileService = {
         }
       }
 
-      // Process images for storage
-      let processedAvatarUrl = avatar_url;
-      let processedCoverImage = cover_image;
+      // Upload images to Cloudinary
+      let cloudinaryAvatarUrl = avatar_url;
+      let cloudinaryCoverImage = cover_image;
 
       if (avatar_url && avatar_url !== user.avatar_url) {
-        console.log('Processing avatar URL for storage...');
+        console.log('Uploading avatar to Cloudinary...');
         try {
-          processedAvatarUrl = await processImageForStorage(avatar_url);
-          console.log('Avatar processing result:', processedAvatarUrl ? 'Success' : 'Failed');
+          cloudinaryAvatarUrl = await uploadProfileImage(avatar_url, userId);
+          console.log('Avatar upload result:', cloudinaryAvatarUrl);
         } catch (error) {
-          console.error('Error processing avatar image:', error);
-          // Keep the original URL if processing fails
-          processedAvatarUrl = avatar_url;
+          console.error('Error uploading avatar image to Cloudinary:', error);
+          // Keep the original URL if upload fails
+          cloudinaryAvatarUrl = avatar_url;
         }
       }
 
       if (cover_image && cover_image !== user.cover_image) {
-        console.log('Processing cover image for storage...');
+        console.log('Uploading cover image to Cloudinary...');
         try {
-          processedCoverImage = await processImageForStorage(cover_image);
-          console.log('Cover image processing result:', processedCoverImage ? 'Success' : 'Failed');
+          cloudinaryCoverImage = await uploadCoverImage(cover_image, userId);
+          console.log('Cover image upload result:', cloudinaryCoverImage);
         } catch (error) {
-          console.error('Error processing cover image:', error);
-          // Keep the original URL if processing fails
-          processedCoverImage = cover_image;
+          console.error('Error uploading cover image to Cloudinary:', error);
+          // Keep the original URL if upload fails
+          cloudinaryCoverImage = cover_image;
         }
       }
 
@@ -554,8 +566,8 @@ export const profileService = {
       if (username) user.username = username;
       if (full_name) user.full_name = full_name;
       if (bio !== undefined) user.bio = bio;
-      if (processedAvatarUrl) user.avatar_url = processedAvatarUrl;
-      if (processedCoverImage !== undefined) user.cover_image = processedCoverImage;
+      if (cloudinaryAvatarUrl) user.avatar_url = cloudinaryAvatarUrl;
+      if (cloudinaryCoverImage !== undefined) user.cover_image = cloudinaryCoverImage;
       if (website !== undefined) user.website = website;
       if (location !== undefined) user.location = location;
 
@@ -569,8 +581,8 @@ export const profileService = {
         if (username) updatedCurrentUser.username = username;
         if (full_name) updatedCurrentUser.full_name = full_name;
         if (bio !== undefined) updatedCurrentUser.bio = bio;
-        if (processedAvatarUrl) updatedCurrentUser.avatar_url = processedAvatarUrl;
-        if (processedCoverImage !== undefined) updatedCurrentUser.cover_image = processedCoverImage;
+        if (cloudinaryAvatarUrl) updatedCurrentUser.avatar_url = cloudinaryAvatarUrl;
+        if (cloudinaryCoverImage !== undefined) updatedCurrentUser.cover_image = cloudinaryCoverImage;
         if (website !== undefined) updatedCurrentUser.website = website;
         if (location !== undefined) updatedCurrentUser.location = location;
 
