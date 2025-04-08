@@ -345,20 +345,31 @@ export default function RichTextEditor({ content, onChange }) {
               /* Ensure lists display properly */
               .preview-content ul,
               .preview-content ol {
-                margin: 0.5rem 0 !important;
+                margin: 0.1rem 0 !important;
                 padding-left: 1.5rem !important;
               }
 
               .preview-content ul li {
                 list-style-type: disc !important;
-                margin: 0.1rem 0 !important;
+                margin: 0 !important;
                 line-height: 1.1 !important;
               }
 
               .preview-content ol li {
                 list-style-type: decimal !important;
-                margin: 0.1rem 0 !important;
+                margin: 0 !important;
                 line-height: 1.1 !important;
+              }
+
+              /* Fix spacing for bullet points and paragraphs */
+              .preview-content li p {
+                margin-top: 0 !important;
+                margin-bottom: 0 !important;
+              }
+
+              /* Fix spacing for consecutive bullet points */
+              .preview-content li + li {
+                margin-top: 0 !important;
               }
 
               /* Ensure headings display properly */
@@ -414,6 +425,16 @@ export default function RichTextEditor({ content, onChange }) {
               /* Reduce spacing between all elements */
               .preview-content * + * {
                 margin-top: 0.1rem !important;
+              }
+
+              /* Fix spacing for bullet points after headings */
+              .preview-content h1 + ul,
+              .preview-content h2 + ul,
+              .preview-content h3 + ul,
+              .preview-content h1 + ol,
+              .preview-content h2 + ol,
+              .preview-content h3 + ol {
+                margin-top: 0 !important;
               }
             `}
           </style>
