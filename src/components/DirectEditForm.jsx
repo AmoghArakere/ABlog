@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import RichTextEditor from './RichTextEditor';
-import ImageUploader from './ImageUploader';
+import CloudinaryUploader from './CloudinaryUploader';
 
 export default function DirectEditForm() {
   // State for user and posts
@@ -248,19 +248,22 @@ export default function DirectEditForm() {
 
                 <div>
                   <label htmlFor="coverImage" className="block text-sm font-medium mb-2 dark:text-white">Cover Image</label>
-                  <ImageUploader
-                    onImageSelect={(imageData) => {
-                      console.log('Image selected, data length:', imageData ? imageData.length : 0);
+                  <CloudinaryUploader
+                    onImageSelect={(imageUrl) => {
+                      console.log('Cloudinary image URL:', imageUrl);
                       if (selectedPost) {
                         // Update the selected post with the new cover image
                         setSelectedPost({
                           ...selectedPost,
-                          cover_image: imageData
+                          cover_image: imageUrl
                         });
                       }
                     }}
                     buttonText="Upload Cover Image"
                     initialImage={selectedPost?.cover_image}
+                    aspectRatio={16/9}
+                    imageType="post"
+                    uniqueId="direct-edit-post-cover-image-uploader"
                   />
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Upload an image to use as the cover for your post. The image will be displayed at the top of your post.

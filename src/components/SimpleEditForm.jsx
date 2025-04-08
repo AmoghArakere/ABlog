@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { blogService } from '../lib/localStorageService';
 import authService from '../lib/authService';
 import RichTextEditor from './RichTextEditor';
-import ImageUploader from './ImageUploader';
+import CloudinaryUploader from './CloudinaryUploader';
 
 export default function SimpleEditForm() {
   const [user, setUser] = useState(null);
@@ -10,7 +10,7 @@ export default function SimpleEditForm() {
   const [loading, setLoading] = useState(true);
   const [selectedPostId, setSelectedPostId] = useState(null);
   const [editingPost, setEditingPost] = useState(null);
-  
+
   // Form state
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -34,24 +34,24 @@ export default function SimpleEditForm() {
     const loadUserAndPosts = async () => {
       try {
         setLoading(true);
-        
+
         // Get current user
         const currentUser = authService.getCurrentUser();
         setUser(currentUser);
-        
+
         if (!currentUser) {
           setError('You must be logged in to edit posts');
           setLoading(false);
           return;
         }
-        
+
         // Get all posts
         const result = await blogService.getAllPosts();
-        
+
         // Filter posts by current user
         const userPosts = result.posts.filter(post => post.author_id === currentUser.id);
         setPosts(userPosts);
-        
+
         setLoading(false);
       } catch (err) {
         console.error('Error loading user and posts:', err);
@@ -59,7 +59,7 @@ export default function SimpleEditForm() {
         setLoading(false);
       }
     };
-    
+
     loadUserAndPosts();
   }, []);
 
@@ -87,27 +87,27 @@ export default function SimpleEditForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!editingPost) {
       setError('No post selected for editing');
       return;
     }
-    
+
     if (!title.trim()) {
       setError('Title is required');
       return;
     }
-    
+
     if (!content.trim()) {
       setError('Content is required');
       return;
     }
-    
+
     try {
       setSaving(true);
       setError('');
       setMessage('');
-      
+
       // Update the post
       const result = await blogService.updatePost(editingPost.id, {
         title,
@@ -118,15 +118,15 @@ export default function SimpleEditForm() {
         categories: editingPost.categories ? editingPost.categories.map(c => c.id) : [],
         tags: editingPost.tags ? editingPost.tags.map(t => t.id) : []
       });
-      
+
       if (result.success) {
         setMessage('Post updated successfully!');
-        
+
         // Refresh the posts list
         const updatedResult = await blogService.getAllPosts();
         const userPosts = updatedResult.posts.filter(post => post.author_id === user.id);
         setPosts(userPosts);
-        
+
         // Update the editing post
         const updatedPost = userPosts.find(p => p.id === editingPost.id);
         if (updatedPost) {
@@ -183,7 +183,7 @@ export default function SimpleEditForm() {
           <h2 className="text-lg font-semibold mb-4">Your Posts</h2>
           <div className="space-y-2">
             {posts.map(post => (
-              <div 
+              <div
                 key={post.id}
                 className={`p-3 rounded-md cursor-pointer transition-colors ${selectedPostId === post.id ? 'bg-primary text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
                 onClick={() => handleSelectPost(post.id)}
@@ -197,7 +197,7 @@ export default function SimpleEditForm() {
           </div>
         </div>
       </div>
-      
+
       <div className="md:col-span-2">
         {!editingPost ? (
           <div className="bg-white rounded-lg shadow p-6 text-center">
@@ -206,19 +206,19 @@ export default function SimpleEditForm() {
         ) : (
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold mb-6">Edit Post</h2>
-            
+
             {error && (
               <div className="bg-red-50 text-red-600 p-4 rounded-md mb-4">
                 {error}
               </div>
             )}
-            
+
             {message && (
               <div className="bg-green-50 text-green-600 p-4 rounded-md mb-4">
                 {message}
               </div>
             )}
-            
+
             <form onSubmit={handleSubmit}>
               <div className="space-y-6">
                 <div>
@@ -232,21 +232,27 @@ export default function SimpleEditForm() {
                     required
                   />
                 </div>
-                
+
                 <div>
                   <label htmlFor="coverImage" className="block text-sm font-medium mb-2">Cover Image</label>
-                  <ImageUploader 
-                    onImageSelect={setCoverImage} 
+                  <CloudinaryUploader
+                    onImageSelect={(imageUrl) => {
+                      console.log('Cloudinary image URL:', imageUrl);
+                      setCoverImage(imageUrl);
+                    }}
                     buttonText="Upload Cover Image"
                     initialImage={coverImage}
+                    aspectRatio={16/9}
+                    imageType="post"
+                    uniqueId="simple-edit-post-cover-image-uploader"
                   />
-                  
+
                   {coverImage && (
                     <div className="mt-4 border rounded-md overflow-hidden">
                       <div className="relative h-48 bg-gray-100">
-                        <img 
-                          src={coverImage} 
-                          alt="Cover preview" 
+                        <img
+                          src={coverImage}
+                          alt="Cover preview"
                           className="h-full w-full object-cover"
                           onError={(e) => {
                             e.target.style.display = 'none';
@@ -256,12 +262,12 @@ export default function SimpleEditForm() {
                     </div>
                   )}
                 </div>
-                
+
                 <div>
                   <label htmlFor="content" className="block text-sm font-medium mb-2">Content</label>
                   <RichTextEditor content={content} onChange={setContent} />
                 </div>
-                
+
                 <div>
                   <label htmlFor="status" className="block text-sm font-medium mb-2">Status</label>
                   <select
@@ -274,7 +280,7 @@ export default function SimpleEditForm() {
                     <option value="draft">Draft</option>
                   </select>
                 </div>
-                
+
                 <div className="flex justify-end space-x-4">
                   <button
                     type="button"
