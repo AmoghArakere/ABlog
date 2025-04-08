@@ -144,8 +144,8 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
 
     const formData = new FormData(e.target);
 
-    // Get values from form
-    let username = formData.get('username');
+    // Get values from form - username is now fixed and cannot be changed
+    const username = profile.username; // Use the existing username
     const full_name = formData.get('fullName');
     const bio = formData.get('bio');
     const avatar_url = formData.get('avatar_url');
@@ -153,18 +153,9 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     const website = formData.get('website');
     const location = formData.get('location');
 
-    // Validate username
-    if (!username || username.trim() === '') {
-      toast.error('Username cannot be empty');
-      return;
-    }
-
-    // Trim the username
-    username = username.trim();
-
-    // Only include fields that have changed
+    // Only include fields that have changed - username is excluded as it cannot be changed
     const updatedProfile = {};
-    if (username !== profile.username) updatedProfile.username = username;
+    // Username is no longer included in the updatedProfile object
     if (full_name !== profile.full_name) updatedProfile.full_name = full_name;
     if (bio !== profile.bio) updatedProfile.bio = bio;
     if (avatar_url !== profile.avatar_url) updatedProfile.avatar_url = avatar_url;
@@ -174,9 +165,8 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
 
     console.log('Updating profile with:', updatedProfile);
 
-    // Check if username is being changed
-    const usernameChanged = updatedProfile.username && updatedProfile.username !== profile.username;
-    console.log('Username changed:', usernameChanged, 'New username:', updatedProfile.username);
+    // Username changes are no longer possible
+    const usernameChanged = false;
 
     try {
       const result = await profileService.updateProfile(user.id, updatedProfile);
@@ -185,28 +175,15 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
         setProfile({ ...profile, ...updatedProfile });
         toast.success('Profile updated successfully!');
 
-        // If username was changed, redirect to the new profile URL
-        if (usernameChanged && updatedProfile.username) {
-          console.log('Redirecting to new profile URL:', `/user/${updatedProfile.username}`);
-          // Update the URL without refreshing the page
-          window.history.pushState({}, '', `/user/${updatedProfile.username}`);
-          // Reload the page to ensure everything is updated correctly
-          window.location.href = `/user/${updatedProfile.username}`;
-        } else {
-          // Just switch to the posts tab if no username change
-          setActiveTab('posts');
-        }
+        // Switch to the posts tab after successful update
+        setActiveTab('posts');
       } else {
         console.error('Profile update returned null result');
         toast.error('Failed to update profile. Please try again.');
       }
     } catch (err) {
       console.error('Error updating profile:', err);
-      if (err.message === 'Username already taken') {
-        toast.error('Username already taken. Please choose a different username.');
-      } else {
-        toast.error('Failed to update profile. Please try again.');
-      }
+      toast.error('Failed to update profile. Please try again.');
     }
   };
 
@@ -443,20 +420,18 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
               <h2 className="text-2xl font-bold mb-6 dark:text-blue-400">Profile Settings</h2>
               <form className="space-y-6" onSubmit={handleUpdateProfile}>
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium mb-2 dark:text-blue-300">Username <span className="text-red-500">*</span></label>
+                  <label htmlFor="username" className="block text-sm font-medium mb-2 dark:text-blue-300">Username</label>
                   <input
                     type="text"
                     id="username"
                     name="username"
-                    defaultValue={profile.username}
-                    required
-                    minLength="3"
-                    maxLength="30"
-                    pattern="[a-zA-Z0-9_]+"
-                    title="Username can only contain letters, numbers, and underscores"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:border-gray-800 dark:text-white"
+                    value={profile.username}
+                    readOnly
+                    disabled
+                    className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
                   />
-                  <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Username is required and can only contain letters, numbers, and underscores.</p>
+                  <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Username cannot be changed once set.</p>
+                  <input type="hidden" name="username" value={profile.username} />
                 </div>
                 <div>
                   <label htmlFor="fullName" className="block text-sm font-medium mb-2 dark:text-blue-300">Full Name</label>

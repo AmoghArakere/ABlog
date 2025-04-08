@@ -510,7 +510,6 @@ export const profileService = {
     try {
       console.log('updateProfile called with:', {
         userId,
-        username: username || 'not provided',
         avatar_url: avatar_url ? (typeof avatar_url === 'string' ? `${avatar_url.substring(0, 30)}...` : '[non-string value]') : null,
         cover_image: cover_image ? (typeof cover_image === 'string' ? `${cover_image.substring(0, 30)}...` : '[non-string value]') : null
       });
@@ -526,21 +525,9 @@ export const profileService = {
       const user = users[userIndex];
       console.log('Found user:', user.username);
 
-      // Ensure username is valid if it's being updated
-      if (username === undefined || username === null || username === '') {
-        console.error('Invalid username provided:', username);
-        // Don't update the username if it's invalid
-        username = user.username;
-      }
-
-      // Check if username is being changed and if it's already taken by another user
-      if (username && username !== user.username) {
-        const usernameExists = users.some(u => u.id !== userId && u.username === username);
-        if (usernameExists) {
-          console.error('Username already taken');
-          throw new Error('Username already taken');
-        }
-      }
+      // Username cannot be changed - always use the existing username
+      username = user.username;
+      console.log('Using existing username:', username);
 
       // Use the image URLs directly (they should already be Cloudinary URLs from the frontend)
       let processedAvatarUrl = null;
@@ -576,13 +563,9 @@ export const profileService = {
         console.log('Updating currentUser in localStorage');
         const updatedCurrentUser = { ...currentUser };
 
-        // Make sure we have a valid username
-        if (username) {
-          console.log('Setting currentUser username to:', username);
-          updatedCurrentUser.username = username;
-        } else if (!updatedCurrentUser.username) {
-          // If somehow the currentUser has no username, set it to the user's username
-          console.log('Setting missing currentUser username to:', user.username);
+        // Username cannot be changed - ensure currentUser has the correct username
+        if (!updatedCurrentUser.username || updatedCurrentUser.username !== user.username) {
+          console.log('Ensuring currentUser has correct username:', user.username);
           updatedCurrentUser.username = user.username;
         }
 
