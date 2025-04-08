@@ -90,7 +90,7 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
 
       console.log(`Using cloudName: ${cloudName}, uploadPreset: ${uploadPreset}`);
 
-      // Use a simpler configuration with unsigned upload preset
+      // Use a configuration compatible with unsigned upload preset
       cloudinaryWidget.current = window.cloudinary.createUploadWidget(
         {
           cloudName: cloudName,
@@ -102,9 +102,6 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
           croppingAspectRatio: aspectRatio,
           folder: `ablog/${type}s`,
           maxFileSize: 5000000, // 5MB
-          // Use a simpler publicId approach
-          useFilename: true,
-          uniqueFilename: true,
           // Debug mode to see more information
           debug: true,
           styles: {
