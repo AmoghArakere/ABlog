@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload Image", initialImage = null }) {
+export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload Image", initialImage = null, aspectRatio = 1, imageType = "profile" }) {
   const [preview, setPreview] = useState(initialImage);
   const [error, setError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
@@ -46,7 +46,8 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
           multiple: false,
           cropping: true,
           showSkipCropButton: false,
-          croppingAspectRatio: 1,
+          croppingAspectRatio: aspectRatio,
+          folder: `ablog/${imageType}s`,
           maxFileSize: 5000000, // 5MB
           styles: {
             palette: {

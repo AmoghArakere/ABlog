@@ -199,7 +199,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden dark:border dark:border-slate-700">
-        <div className="h-48 relative bg-gradient-to-r from-purple-900/50 to-black overflow-hidden">
+        <div className="h-64 relative bg-gradient-to-r from-purple-900/50 to-black overflow-hidden">
           {profile.cover_image && (
             <img
               src={getImageUrl(profile.cover_image, '/images/placeholder-cover.svg')}
@@ -458,6 +458,8 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                         }}
                         buttonText="Upload Profile Picture"
                         initialImage={profile.avatar_url}
+                        aspectRatio={1}
+                        imageType="profile"
                       />
                       {profile.avatar_url && (
                         <div className="mt-2">
@@ -502,6 +504,8 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                         }}
                         buttonText="Upload Cover Image"
                         initialImage={profile.cover_image}
+                        aspectRatio={3}
+                        imageType="cover"
                       />
                       {profile.cover_image && (
                         <div className="mt-2">
@@ -510,7 +514,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                             <img
                               src={getImageUrl(profile.cover_image, '/images/placeholder-cover.svg')}
                               alt="Current cover"
-                              className="h-20 w-full object-cover rounded preview-cover-image"
+                              className="h-32 w-full object-cover rounded preview-cover-image"
                               onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src = '/images/placeholder-cover.svg';

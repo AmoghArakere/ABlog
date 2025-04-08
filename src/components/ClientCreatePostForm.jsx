@@ -234,6 +234,8 @@ export default function ClientCreatePostForm() {
               }}
               buttonText="Upload Cover Image"
               initialImage={coverImage}
+              aspectRatio={16/9}
+              imageType="post"
             />
           </div>
 
