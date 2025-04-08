@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clear ABlog Cache</title>
+  <style>
+    body {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      max-width: 600px;
+      background-color: #111;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      color: #8A46F0;
+      margin-top: 0;
+    }
+    p {
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    button {
+      background: linear-gradient(to right, #3b82f6, #8A46F0);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 6px;
+      background-color: #222;
+      display: none;
+    }
+    .success {
+      color: #10b981;
+    }
+    .error {
+      color: #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Clear ABlog Cache</h1>
+    <p>This will clear all localStorage data for ABlog, including user accounts, posts, and settings. Use this if you're experiencing issues with the application.</p>
+    <button id="clearButton">Clear Cache</button>
+    <div id="result" class="result">
+      <p id="message"></p>
+      <p><a href="/" id="homeLink">Return to Home Page</a></p>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('clearButton').addEventListener('click', function() {
+      try {
+        // List of keys to clear
+        const keysToRemove = [
+          'users',
+          'posts',
+          'comments',
+          'likes',
+          'bookmarks',
+          'follows',
+          'currentUser',
+          'categories',
+          'tags'
+        ];
+
+        // Remove each key
+        keysToRemove.forEach(key => {
+          localStorage.removeItem(key);
+        });
+
+        // Show success message
+        const resultDiv = document.getElementById('result');
+        const messageP = document.getElementById('message');
+        resultDiv.style.display = 'block';
+        messageP.textContent = 'Cache cleared successfully! You can now return to the application with a fresh start.';
+        messageP.className = 'success';
+      } catch (error) {
+        // Show error message
+        const resultDiv = document.getElementById('result');
+        const messageP = document.getElementById('message');
+        resultDiv.style.display = 'block';
+        messageP.textContent = 'Error clearing cache: ' + error.message;
+        messageP.className = 'error';
+      }
+    });
+  </script>
+</body>
+</html>
