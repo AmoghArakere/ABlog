@@ -1,5 +1,16 @@
 /* Blog content styles */
 
+/* Apply Merriweather font to all blog content */
+.blog-content {
+  font-family: 'Merriweather', serif !important;
+}
+
+/* Use Source Code Pro for code blocks */
+.blog-content code,
+.blog-content pre {
+  font-family: 'Source Code Pro', monospace !important;
+}
+
 .blog-content img {
   display: block !important;
   max-width: 100% !important;

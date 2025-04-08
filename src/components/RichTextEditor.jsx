@@ -317,7 +317,7 @@ export default function RichTextEditor({ content, onChange }) {
           placeholder="Write your content here using Markdown..."
         />
       ) : (
-        <div className="w-full min-h-[400px] p-4 prose max-w-none overflow-auto bg-gray-800 text-white" style={{ lineHeight: 1.2 }}>
+        <div className="w-full min-h-[400px] p-4 prose max-w-none overflow-auto bg-gray-800 text-white" style={{ lineHeight: 1.2, fontFamily: '"Merriweather", serif' }}>
           <style>
             {`
               /* Ensure images display properly in the preview */
@@ -396,6 +396,17 @@ export default function RichTextEditor({ content, onChange }) {
                 line-height: 1 !important;
               }
 
+              /* Set font for all preview content */
+              .preview-content {
+                font-family: 'Merriweather', serif !important;
+              }
+
+              /* Use Source Code Pro for code blocks */
+              .preview-content code,
+              .preview-content pre {
+                font-family: 'Source Code Pro', monospace !important;
+              }
+
               /* Ensure paragraphs display properly */
               .preview-content p {
                 margin: 0 !important;
@@ -442,6 +453,7 @@ export default function RichTextEditor({ content, onChange }) {
           </style>
           <div
             className="preview-content"
+            style={{ fontFamily: '"Merriweather", serif' }}
             dangerouslySetInnerHTML={{ __html: markdownToHtml(editorContent) }}
           />
           {editorContent.includes('![') && (
