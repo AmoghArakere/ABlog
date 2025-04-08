@@ -510,6 +510,7 @@ export const profileService = {
     try {
       console.log('updateProfile called with:', {
         userId,
+        username: username || 'not provided',
         avatar_url: avatar_url ? (typeof avatar_url === 'string' ? `${avatar_url.substring(0, 30)}...` : '[non-string value]') : null,
         cover_image: cover_image ? (typeof cover_image === 'string' ? `${cover_image.substring(0, 30)}...` : '[non-string value]') : null
       });
@@ -524,6 +525,13 @@ export const profileService = {
 
       const user = users[userIndex];
       console.log('Found user:', user.username);
+
+      // Ensure username is valid if it's being updated
+      if (username === undefined || username === null || username === '') {
+        console.error('Invalid username provided:', username);
+        // Don't update the username if it's invalid
+        username = user.username;
+      }
 
       // Check if username is being changed and if it's already taken by another user
       if (username && username !== user.username) {
@@ -565,8 +573,19 @@ export const profileService = {
       // Also update the currentUser in localStorage if it's the same user
       const currentUser = JSON.parse(getFromStorage('currentUser'));
       if (currentUser && currentUser.id === userId) {
+        console.log('Updating currentUser in localStorage');
         const updatedCurrentUser = { ...currentUser };
-        if (username) updatedCurrentUser.username = username;
+
+        // Make sure we have a valid username
+        if (username) {
+          console.log('Setting currentUser username to:', username);
+          updatedCurrentUser.username = username;
+        } else if (!updatedCurrentUser.username) {
+          // If somehow the currentUser has no username, set it to the user's username
+          console.log('Setting missing currentUser username to:', user.username);
+          updatedCurrentUser.username = user.username;
+        }
+
         if (full_name) updatedCurrentUser.full_name = full_name;
         if (bio !== undefined) updatedCurrentUser.bio = bio;
         if (processedAvatarUrl) updatedCurrentUser.avatar_url = processedAvatarUrl; // Only update if new avatar was provided
@@ -574,6 +593,7 @@ export const profileService = {
         if (website !== undefined) updatedCurrentUser.website = website;
         if (location !== undefined) updatedCurrentUser.location = location;
 
+        console.log('Saving updated currentUser:', updatedCurrentUser.username);
         setToStorage('currentUser', JSON.stringify(updatedCurrentUser));
       }
 

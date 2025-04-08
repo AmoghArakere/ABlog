@@ -145,13 +145,22 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     const formData = new FormData(e.target);
 
     // Get values from form
-    const username = formData.get('username');
+    let username = formData.get('username');
     const full_name = formData.get('fullName');
     const bio = formData.get('bio');
     const avatar_url = formData.get('avatar_url');
     const cover_image = formData.get('cover_image');
     const website = formData.get('website');
     const location = formData.get('location');
+
+    // Validate username
+    if (!username || username.trim() === '') {
+      toast.error('Username cannot be empty');
+      return;
+    }
+
+    // Trim the username
+    username = username.trim();
 
     // Only include fields that have changed
     const updatedProfile = {};
@@ -166,23 +175,30 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     console.log('Updating profile with:', updatedProfile);
 
     // Check if username is being changed
-    const usernameChanged = updatedProfile.username !== profile.username;
+    const usernameChanged = updatedProfile.username && updatedProfile.username !== profile.username;
+    console.log('Username changed:', usernameChanged, 'New username:', updatedProfile.username);
 
     try {
       const result = await profileService.updateProfile(user.id, updatedProfile);
       if (result) {
+        // Update the local profile state with the updated values
         setProfile({ ...profile, ...updatedProfile });
         toast.success('Profile updated successfully!');
 
         // If username was changed, redirect to the new profile URL
-        if (usernameChanged) {
+        if (usernameChanged && updatedProfile.username) {
+          console.log('Redirecting to new profile URL:', `/user/${updatedProfile.username}`);
           // Update the URL without refreshing the page
           window.history.pushState({}, '', `/user/${updatedProfile.username}`);
           // Reload the page to ensure everything is updated correctly
           window.location.href = `/user/${updatedProfile.username}`;
         } else {
+          // Just switch to the posts tab if no username change
           setActiveTab('posts');
         }
+      } else {
+        console.error('Profile update returned null result');
+        toast.error('Failed to update profile. Please try again.');
       }
     } catch (err) {
       console.error('Error updating profile:', err);
@@ -427,14 +443,20 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
               <h2 className="text-2xl font-bold mb-6 dark:text-blue-400">Profile Settings</h2>
               <form className="space-y-6" onSubmit={handleUpdateProfile}>
                 <div>
-                  <label htmlFor="username" className="block text-sm font-medium mb-2 dark:text-blue-300">Username</label>
+                  <label htmlFor="username" className="block text-sm font-medium mb-2 dark:text-blue-300">Username <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     id="username"
                     name="username"
                     defaultValue={profile.username}
+                    required
+                    minLength="3"
+                    maxLength="30"
+                    pattern="[a-zA-Z0-9_]+"
+                    title="Username can only contain letters, numbers, and underscores"
                     className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-900 dark:border-gray-800 dark:text-white"
                   />
+                  <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">Username is required and can only contain letters, numbers, and underscores.</p>
                 </div>
                 <div>
                   <label htmlFor="fullName" className="block text-sm font-medium mb-2 dark:text-blue-300">Full Name</label>
