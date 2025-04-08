@@ -345,43 +345,53 @@ export default function RichTextEditor({ content, onChange }) {
               /* Ensure lists display properly */
               .preview-content ul,
               .preview-content ol {
-                margin: 1rem 0 !important;
+                margin: 0.5rem 0 !important;
                 padding-left: 1.5rem !important;
               }
 
               .preview-content ul li {
                 list-style-type: disc !important;
-                margin: 0.25rem 0 !important;
+                margin: 0.1rem 0 !important;
+                line-height: 1.1 !important;
               }
 
               .preview-content ol li {
                 list-style-type: decimal !important;
-                margin: 0.25rem 0 !important;
+                margin: 0.1rem 0 !important;
+                line-height: 1.1 !important;
               }
 
               /* Ensure headings display properly */
               .preview-content h1 {
                 font-size: 1.875rem !important;
                 font-weight: 700 !important;
-                margin: 1.5rem 0 1rem !important;
+                margin: 1rem 0 0.5rem !important;
+                line-height: 1.1 !important;
               }
 
               .preview-content h2 {
                 font-size: 1.5rem !important;
                 font-weight: 700 !important;
-                margin: 1.25rem 0 0.75rem !important;
+                margin: 0.75rem 0 0.5rem !important;
+                line-height: 1.1 !important;
               }
 
               .preview-content h3 {
                 font-size: 1.25rem !important;
                 font-weight: 700 !important;
-                margin: 1rem 0 0.5rem !important;
+                margin: 0.75rem 0 0.25rem !important;
+                line-height: 1.1 !important;
               }
 
               /* Ensure paragraphs display properly */
               .preview-content p {
-                margin: 0.25rem 0 !important;
-                line-height: 1.2 !important;
+                margin: 0.1rem 0 !important;
+                line-height: 1.1 !important;
+              }
+
+              /* Reduce spacing between paragraphs */
+              .preview-content p + p {
+                margin-top: 0.1rem !important;
               }
 
               /* Ensure links display properly */
@@ -396,9 +406,14 @@ export default function RichTextEditor({ content, onChange }) {
 
               /* Ensure horizontal rules display properly */
               .preview-content hr {
-                margin: 1.5rem 0 !important;
+                margin: 1rem 0 !important;
                 border: 0 !important;
                 border-top: 1px solid #d1d5db !important;
+              }
+
+              /* Reduce spacing between all elements */
+              .preview-content * + * {
+                margin-top: 0.1rem !important;
               }
             `}
           </style>
