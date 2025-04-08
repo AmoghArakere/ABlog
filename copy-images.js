@@ -1,6 +1,11 @@
 // Simple script to ensure images are copied to the build directory
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get the directory name in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Create the images directory in the dist folder if it doesn't exist
 const distImagesDir = path.join(__dirname, 'dist', 'images');
@@ -18,7 +23,7 @@ const imagesToCopy = [
 imagesToCopy.forEach(image => {
   const sourcePath = path.join(__dirname, 'public', 'images', image);
   const destPath = path.join(distImagesDir, image);
-  
+
   if (fs.existsSync(sourcePath)) {
     fs.copyFileSync(sourcePath, destPath);
     console.log(`Copied ${image} to dist/images/`);
