@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { profileService, blogService } from '../lib/localStorageService';
+import { getImageUrl } from '../lib/imageUtils';
 
 export default function UserProfile({ username }) {
   const { user } = useAuth();
@@ -128,9 +129,13 @@ export default function UserProfile({ username }) {
             <div className="w-32 h-32 bg-gray-200 rounded-full border-4 border-white overflow-hidden">
               {profile.avatar_url ? (
                 <img
-                  src={profile.avatar_url}
+                  src={getImageUrl(profile.avatar_url, '/images/placeholder-profile.svg')}
                   alt={profile.full_name || profile.username}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/images/placeholder-profile.svg';
+                  }}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-primary text-white text-4xl font-bold">
@@ -273,9 +278,13 @@ export default function UserProfile({ username }) {
                       {post.cover_image && (
                         <div className="h-48 bg-gray-200">
                           <img
-                            src={post.cover_image}
+                            src={getImageUrl(post.cover_image, '/images/placeholder-blog.svg')}
                             alt={post.title}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/images/placeholder-blog.svg';
+                            }}
                           />
                         </div>
                       )}

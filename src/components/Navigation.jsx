@@ -3,6 +3,7 @@ import authService from '../lib/authService';
 import { useNavigation } from '../contexts/NavigationContext';
 import { Button } from './ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar';
+import { getImageUrl } from '../lib/imageUtils';
 import { LoadingBar } from './ui/loading-bar';
 import { Menu, ChevronDown, LogOut, User, PenSquare, LayoutDashboard } from 'lucide-react';
 
@@ -107,7 +108,15 @@ export default function Navigation() {
                 >
                   <Avatar className="h-8 w-8 mr-1">
                     {user.avatar_url ? (
-                      <AvatarImage src={user.avatar_url} alt={user.full_name || user.username} className="header-profile-pic" />
+                      <AvatarImage
+                        src={getImageUrl(user.avatar_url, '/images/placeholder-profile.svg')}
+                        alt={user.full_name || user.username}
+                        className="header-profile-pic"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/images/placeholder-profile.svg';
+                        }}
+                      />
                     ) : (
                       <AvatarFallback className="bg-blue-600 text-white">
                         {(user.full_name || user.username || user.email).charAt(0).toUpperCase()}

@@ -2,6 +2,7 @@ import React from 'react';
 import { MapPin, Link as LinkIcon, Calendar, Users, Edit } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from './avatar';
 import { Button } from './button';
+import { getImageUrl } from '../../lib/imageUtils';
 
 export default function ProfileHeader({ profile, isCurrentUser, onEditProfile }) {
   return (
@@ -9,7 +10,7 @@ export default function ProfileHeader({ profile, isCurrentUser, onEditProfile })
       <div className="relative h-48 bg-gradient-to-r from-blue-500/20 to-purple-500/10 overflow-hidden">
         {profile.cover_image && (
           <img
-            src={profile.cover_image}
+            src={getImageUrl(profile.cover_image, '/images/placeholder-cover.svg')}
             alt="Cover"
             className="w-full h-full object-cover header-cover-image"
             onError={(e) => {
@@ -38,9 +39,13 @@ export default function ProfileHeader({ profile, isCurrentUser, onEditProfile })
             <Avatar className="h-24 w-24 md:h-32 md:w-32 border-4 border-white shadow-md">
               {profile.avatar_url ? (
                 <AvatarImage
-                  src={profile.avatar_url}
+                  src={getImageUrl(profile.avatar_url, '/images/placeholder-profile.svg')}
                   alt={profile.full_name || profile.username}
                   className="header-profile-pic"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/images/placeholder-profile.svg';
+                  }}
                 />
               ) : (
                 <AvatarFallback className="text-2xl md:text-3xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-700 text-white">

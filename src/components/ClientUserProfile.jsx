@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { profileService, blogService, bookmarkService } from '../lib/localStorageService';
 import authService from '../lib/authService';
 import { useToastContext } from '../contexts/ToastContext';
+import { getImageUrl } from '../lib/imageUtils';
 import ClientBlogPostCard from './ClientBlogPostCard';
 import ImageUploader from './ImageUploader';
 import ImageAdjuster from './ImageAdjuster';
@@ -200,7 +201,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
         <div className="h-48 relative bg-gradient-to-r from-purple-900/50 to-black overflow-hidden">
           {profile.cover_image && (
             <img
-              src={profile.cover_image}
+              src={getImageUrl(profile.cover_image, '/images/placeholder-cover.svg')}
               alt="Cover"
               className="w-full h-full object-cover header-cover-image"
               onError={(e) => {
@@ -216,12 +217,12 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
             <div className="w-32 h-32 bg-gray-800 rounded-full border-4 border-black dark:border-gray-900 overflow-hidden relative group">
               {profile.avatar_url ? (
                 <img
-                  src={profile.avatar_url}
+                  src={getImageUrl(profile.avatar_url, '/images/placeholder-profile.svg')}
                   alt={profile.full_name || profile.username}
                   className="w-full h-full object-cover header-profile-pic"
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '/images/placeholder-cover.svg';
+                    e.target.src = '/images/placeholder-profile.svg';
                   }}
                 />
               ) : (
@@ -452,12 +453,12 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                           <p className="text-xs text-text-muted dark:text-gray-400">Current profile picture:</p>
                           <div className="relative mt-1 inline-block">
                             <img
-                              src={profile.avatar_url}
+                              src={getImageUrl(profile.avatar_url, '/images/placeholder-profile.svg')}
                               alt="Current avatar"
                               className="h-20 w-20 object-cover rounded-full preview-profile-pic"
                               onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = '/images/placeholder-cover.svg';
+                                e.target.src = '/images/placeholder-profile.svg';
                               }}
                             />
                             {/* Edit button removed */}
@@ -486,7 +487,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                           <p className="text-xs text-text-muted dark:text-gray-400">Current cover image:</p>
                           <div className="relative mt-1">
                             <img
-                              src={profile.cover_image}
+                              src={getImageUrl(profile.cover_image, '/images/placeholder-cover.svg')}
                               alt="Current cover"
                               className="h-20 w-full object-cover rounded preview-cover-image"
                               onError={(e) => {

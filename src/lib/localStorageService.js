@@ -1,3 +1,5 @@
+import { processImageForStorage, getImageUrl } from './imageUtils';
+
 // Generate a random ID
 const generateId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
@@ -510,12 +512,26 @@ export const profileService = {
         }
       }
 
+      // Process images for storage
+      let processedAvatarUrl = avatar_url;
+      let processedCoverImage = cover_image;
+
+      if (avatar_url && avatar_url !== user.avatar_url) {
+        processedAvatarUrl = await processImageForStorage(avatar_url);
+        console.log('Processed avatar URL for storage:', processedAvatarUrl ? 'Success' : 'Failed');
+      }
+
+      if (cover_image && cover_image !== user.cover_image) {
+        processedCoverImage = await processImageForStorage(cover_image);
+        console.log('Processed cover image for storage:', processedCoverImage ? 'Success' : 'Failed');
+      }
+
       // Update user fields
       if (username) user.username = username;
       if (full_name) user.full_name = full_name;
       if (bio !== undefined) user.bio = bio;
-      if (avatar_url) user.avatar_url = avatar_url;
-      if (cover_image !== undefined) user.cover_image = cover_image;
+      if (processedAvatarUrl) user.avatar_url = processedAvatarUrl;
+      if (processedCoverImage !== undefined) user.cover_image = processedCoverImage;
       if (website !== undefined) user.website = website;
       if (location !== undefined) user.location = location;
 
@@ -529,8 +545,8 @@ export const profileService = {
         if (username) updatedCurrentUser.username = username;
         if (full_name) updatedCurrentUser.full_name = full_name;
         if (bio !== undefined) updatedCurrentUser.bio = bio;
-        if (avatar_url) updatedCurrentUser.avatar_url = avatar_url;
-        if (cover_image !== undefined) updatedCurrentUser.cover_image = cover_image;
+        if (processedAvatarUrl) updatedCurrentUser.avatar_url = processedAvatarUrl;
+        if (processedCoverImage !== undefined) updatedCurrentUser.cover_image = processedCoverImage;
         if (website !== undefined) updatedCurrentUser.website = website;
         if (location !== undefined) updatedCurrentUser.location = location;
 
