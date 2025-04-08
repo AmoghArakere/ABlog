@@ -1,0 +1,9 @@
+{
+  "functions": [
+    {
+      "function": "entry",
+      "pattern": "^/.*$"
+    }
+  ],
+  "version": 1
+}

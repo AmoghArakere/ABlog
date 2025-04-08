@@ -9,3 +9,7 @@
   command = "npm run dev"
   port = 4321
   targetPort = 4321
+
+[[edge_functions]]
+  function = "entry"
+  path = "/*"
