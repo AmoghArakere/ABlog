@@ -103,9 +103,11 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
             if (!error && result && result.event === "success") {
               const imageUrl = result.info.secure_url;
               console.log(`${type} upload successful:`, imageUrl);
+              console.log('Full result info:', result.info);
               setPreview(imageUrl);
               setError('');
               if (onImageSelect) {
+                console.log(`Calling onImageSelect with URL: ${imageUrl}`);
                 onImageSelect(imageUrl);
               }
               setIsUploading(false);

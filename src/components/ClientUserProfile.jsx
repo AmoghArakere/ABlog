@@ -172,10 +172,19 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     const usernameChanged = false;
 
     try {
+      console.log('Submitting profile update with:', updatedProfile);
+      if (updatedProfile.avatar_url) {
+        console.log(`Avatar URL being submitted: ${updatedProfile.avatar_url.substring(0, 50)}...`);
+      }
+
       const result = await profileService.updateProfile(user.id, updatedProfile);
+      console.log('Profile update result:', result);
+
       if (result) {
         // Update the local profile state with the updated values
-        setProfile({ ...profile, ...updatedProfile });
+        const newProfileState = { ...profile, ...updatedProfile };
+        console.log('Setting new profile state:', newProfileState);
+        setProfile(newProfileState);
         toast.success('Profile updated successfully!');
 
         // Switch to the posts tab after successful update
@@ -467,15 +476,29 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                             console.log('Profile picture selected:', imageUrl);
                             // Set the image URL directly - no need for adjustment with Cloudinary
                             const hiddenInput = document.getElementById('avatar_url');
-                            if (hiddenInput) hiddenInput.value = imageUrl;
+                            if (hiddenInput) {
+                              console.log(`Setting hidden input value to: ${imageUrl}`);
+                              hiddenInput.value = imageUrl;
+                              console.log(`Hidden input value after setting: ${hiddenInput.value}`);
+                            } else {
+                              console.error('Could not find avatar_url hidden input');
+                            }
 
                             // Update ONLY profile picture previews
                             const previewImg = document.querySelector('.preview-profile-pic');
                             if (previewImg) {
+                              console.log(`Updating preview image src to: ${imageUrl}`);
                               previewImg.src = imageUrl;
                               // Also update the profile picture in the header if it exists
                               const headerProfilePic = document.querySelector('.header-profile-pic');
-                              if (headerProfilePic) headerProfilePic.src = imageUrl;
+                              if (headerProfilePic) {
+                                console.log(`Updating header profile pic src to: ${imageUrl}`);
+                                headerProfilePic.src = imageUrl;
+                              } else {
+                                console.error('Could not find header-profile-pic element');
+                              }
+                            } else {
+                              console.error('Could not find preview-profile-pic element');
                             }
                           }
                         }}
