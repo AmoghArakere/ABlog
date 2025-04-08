@@ -6,6 +6,9 @@ export default function DirectImageBlogCard({ post, showAuthor = true }) {
   // Handle both local and external images
   const imageUrl = post.cover_image || '/images/placeholder-blog.svg';
 
+  // For Netlify deployment, ensure the path is correct
+  const fallbackImageUrl = imageUrl.startsWith('/') ? imageUrl : `/images/placeholder-blog.svg`;
+
   // Log the image URL for debugging
   console.log('Blog card image URL:', imageUrl);
 
@@ -28,7 +31,7 @@ export default function DirectImageBlogCard({ post, showAuthor = true }) {
           onError={(e) => {
             console.log('Blog card image failed to load:', imageUrl);
             e.target.onerror = null;
-            e.target.src = '/images/placeholder-blog.svg';
+            e.target.src = fallbackImageUrl;
           }}
         />
       </div>
