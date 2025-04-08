@@ -6,24 +6,16 @@ ABlog is a modern, feature-rich blogging platform built with Astro.js, offering 
 
 ## 🚀 Features
 
-### For Writers
-
 - **Rich Text Editor**: Markdown-based editor with support for formatting, code blocks, images, and more
 - **Image Upload**: Seamless image uploads via Cloudinary integration
-- **Post Management**: Create, edit, and manage your posts with ease
+- **Post Management**: Create, edit, and manage posts with ease
 - **Scheduling**: Schedule posts for future publication
-- **Categories & Tags**: Organize your content with categories and tags
-- **Profile Customization**: Personalize your profile with custom profile pictures and cover images
-
-### For Readers
-
-- **Discover Content**: Explore posts from various writers on the platform
+- **Categories & Tags**: Organize content with categories and tags
+- **Profile Customization**: Personalize profiles with custom profile pictures and cover images
+- **Content Discovery**: Explore posts from various writers on the platform
 - **User Profiles**: View writer profiles and their published content
 - **Engagement**: Like, bookmark, and comment on posts
-- **Follow System**: Follow your favorite writers to stay updated with their content
-
-### Platform Features
-
+- **Follow System**: Follow favorite writers to stay updated with their content
 - **Authentication**: Secure user authentication system
 - **Responsive Design**: Fully responsive design that works on all devices
 - **Dark Mode**: Beautiful dark-themed UI for comfortable reading
