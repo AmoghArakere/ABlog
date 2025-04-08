@@ -533,15 +533,15 @@ export const profileService = {
       let processedAvatarUrl = null;
       let processedCoverImage = null;
 
-      // Only process avatar URL if it's provided and different from current
-      if (avatar_url && avatar_url !== user.avatar_url) {
-        console.log('Using new avatar URL:', avatar_url.substring(0, 50) + '...');
+      // Process avatar URL if it's provided
+      if (avatar_url) {
+        console.log('Using avatar URL:', avatar_url.substring(0, 50) + '...');
         processedAvatarUrl = avatar_url;
       }
 
-      // Only process cover image if it's provided and different from current
-      if (cover_image && cover_image !== user.cover_image) {
-        console.log('Using new cover image URL:', cover_image.substring(0, 50) + '...');
+      // Process cover image if it's provided
+      if (cover_image) {
+        console.log('Using cover image URL:', cover_image.substring(0, 50) + '...');
         processedCoverImage = cover_image;
       }
 

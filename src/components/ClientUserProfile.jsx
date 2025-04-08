@@ -158,8 +158,11 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     // Username is no longer included in the updatedProfile object
     if (full_name !== profile.full_name) updatedProfile.full_name = full_name;
     if (bio !== profile.bio) updatedProfile.bio = bio;
-    if (avatar_url !== profile.avatar_url) updatedProfile.avatar_url = avatar_url;
-    if (cover_image !== profile.cover_image) updatedProfile.cover_image = cover_image;
+
+    // Always include avatar_url and cover_image if they exist
+    if (avatar_url) updatedProfile.avatar_url = avatar_url;
+    if (cover_image) updatedProfile.cover_image = cover_image;
+
     if (website !== profile.website) updatedProfile.website = website;
     if (location !== profile.location) updatedProfile.location = location;
 
