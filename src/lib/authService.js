@@ -32,7 +32,30 @@ const authService = {
   // Get the current user
   getCurrentUser() {
     const userJson = getFromStorage('currentUser', null);
-    return userJson ? JSON.parse(userJson) : null;
+    if (!userJson) return null;
+
+    try {
+      const user = JSON.parse(userJson);
+
+      // Validate that the user has a username
+      if (!user.username) {
+        console.error('User missing username:', user);
+        // Try to fix the user by setting a default username if they have an email
+        if (user.email) {
+          user.username = user.email.split('@')[0];
+          console.log('Setting default username from email:', user.username);
+          // Update the user in localStorage
+          setToStorage('currentUser', JSON.stringify(user));
+        } else {
+          console.error('Cannot fix user without email');
+        }
+      }
+
+      return user;
+    } catch (error) {
+      console.error('Error parsing current user:', error);
+      return null;
+    }
   },
 
   // Sign in with email and password

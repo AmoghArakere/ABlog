@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload Image", initialImage = null, aspectRatio = 1, imageType = "profile", uniqueId = Math.random().toString(36).substring(7) }) {
+  console.log(`Initializing CloudinaryUploader for ${imageType} with uniqueId: ${uniqueId}`);
   const [preview, setPreview] = useState(initialImage);
   const [error, setError] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const cloudinaryWidget = useRef(null);
+
+  // Create a unique ID for this uploader instance
+  const uploaderId = useRef(`${imageType}-${uniqueId}`).current;
 
   // Set initial image if provided
   useEffect(() => {
@@ -19,25 +23,44 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
 
   // Initialize Cloudinary widget when component mounts
   useEffect(() => {
+    console.log(`Setting up Cloudinary widget for ${imageType} with ID: ${uniqueId}`);
     // Check if Cloudinary script is already loaded
     if (!window.cloudinary) {
       // Load Cloudinary script
       const script = document.createElement('script');
       script.src = 'https://upload-widget.cloudinary.com/global/all.js';
       script.async = true;
-      script.onload = initializeWidget;
+      script.onload = () => initializeWidget(uniqueId, imageType);
       document.body.appendChild(script);
 
       return () => {
-        document.body.removeChild(script);
+        // Only remove the script if no other uploaders are using it
+        if (!document.querySelector('.cloudinary-uploader-active')) {
+          document.body.removeChild(script);
+        }
+        // Clear any data attributes related to this uploader
+        if (document.body.getAttribute('data-active-uploader') === uploaderId) {
+          document.body.removeAttribute('data-active-uploader');
+        }
       };
     } else {
-      initializeWidget();
+      initializeWidget(uniqueId, imageType);
     }
-  }, []);
 
-  const initializeWidget = () => {
+    // Cleanup function
+    return () => {
+      console.log(`Cleaning up Cloudinary widget for ${imageType} with ID: ${uniqueId} (uploaderId: ${uploaderId})`);
+      // Clear any data attributes related to this uploader
+      if (document.body.getAttribute('data-active-uploader') === uploaderId) {
+        document.body.removeAttribute('data-active-uploader');
+      }
+    };
+  }, [uniqueId, imageType]);
+
+  const initializeWidget = (widgetId, type) => {
+    console.log(`Creating widget for ${type} with ID: ${widgetId} (uploaderId: ${uploaderId})`);
     if (window.cloudinary) {
+      // Create a unique widget instance for this component
       cloudinaryWidget.current = window.cloudinary.createUploadWidget(
         {
           cloudName: import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'dvrnheiru',
@@ -47,8 +70,10 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
           cropping: true,
           showSkipCropButton: false,
           croppingAspectRatio: aspectRatio,
-          folder: `ablog/${imageType}s`,
+          folder: `ablog/${type}s`,
           maxFileSize: 5000000, // 5MB
+          // Add a unique ID to this widget instance
+          publicId: uploaderId,
           styles: {
             palette: {
               window: "#000000",
@@ -68,21 +93,37 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
           }
         },
         (error, result) => {
-          if (!error && result && result.event === "success") {
-            const imageUrl = result.info.secure_url;
-            console.log('Cloudinary upload successful:', imageUrl);
-            setPreview(imageUrl);
-            setError('');
-            if (onImageSelect) {
-              onImageSelect(imageUrl);
+          // Check if this callback is for the active uploader
+          const activeUploader = document.body.getAttribute('data-active-uploader');
+          console.log(`Widget ${widgetId} (${type}) callback:`, result ? result.event : 'No result');
+          console.log(`Active uploader: ${activeUploader}, This uploader: ${uploaderId}`);
+
+          // Only process the callback if it's for this uploader or if we're closing
+          if (activeUploader === uploaderId || (result && result.event === "close")) {
+            if (!error && result && result.event === "success") {
+              const imageUrl = result.info.secure_url;
+              console.log(`${type} upload successful:`, imageUrl);
+              setPreview(imageUrl);
+              setError('');
+              if (onImageSelect) {
+                onImageSelect(imageUrl);
+              }
+              setIsUploading(false);
+              // Clear the active uploader data attribute
+              document.body.removeAttribute('data-active-uploader');
+            } else if (error) {
+              console.error(`${type} upload error:`, error);
+              setError('Error uploading image. Please try again.');
+              setIsUploading(false);
+              // Clear the active uploader data attribute
+              document.body.removeAttribute('data-active-uploader');
+            } else if (result && result.event === "close") {
+              setIsUploading(false);
+              // Clear the active uploader data attribute
+              document.body.removeAttribute('data-active-uploader');
             }
-            setIsUploading(false);
-          } else if (error) {
-            console.error('Cloudinary upload error:', error);
-            setError('Error uploading image. Please try again.');
-            setIsUploading(false);
-          } else if (result && result.event === "close") {
-            setIsUploading(false);
+          } else {
+            console.log(`Ignoring callback for inactive uploader ${thisUploader}`);
           }
         }
       );
@@ -90,10 +131,17 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
   };
 
   const handleButtonClick = () => {
+    console.log(`Opening widget for ${imageType} with ID: ${uniqueId} (uploaderId: ${uploaderId})`);
     if (cloudinaryWidget.current) {
       setIsUploading(true);
+      // Add a data attribute to track which uploader is currently active
+      document.body.setAttribute('data-active-uploader', uploaderId);
+      // Add a class to mark this uploader as active
+      document.body.classList.add('cloudinary-uploader-active');
+      // Open the widget with a specific context to ensure it's the right one
       cloudinaryWidget.current.open();
     } else {
+      console.error(`Widget for ${imageType} (${uniqueId}) not initialized`);
       setError('Image upload is not available. Please try again later.');
     }
   };

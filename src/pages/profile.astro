@@ -7,6 +7,18 @@ import CurrentUserProfile from '../components/CurrentUserProfile';
 <Layout title="My Profile - ABlog" description="Manage your ABlog profile and content">
     <section class="py-12">
         <div class="container mx-auto px-4">
+            <script>
+                // Check if user is logged in before rendering the profile
+                const checkUser = () => {
+                    const user = localStorage.getItem('currentUser');
+                    if (!user) {
+                        window.location.href = '/login';
+                    }
+                };
+
+                // Run the check when the page loads
+                document.addEventListener('DOMContentLoaded', checkUser);
+            </script>
             <CurrentUserProfile client:only="react" />
         </div>
     </section>

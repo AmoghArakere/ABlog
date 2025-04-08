@@ -42,6 +42,7 @@ const initializeStorage = () => {
   if (!isBrowser) return;
 
   try {
+    // Initialize empty collections if they don't exist
     if (!getFromStorage('users')) {
       setToStorage('users', JSON.stringify([]));
     }
@@ -59,6 +60,23 @@ const initializeStorage = () => {
     }
     if (!getFromStorage('follows')) {
       setToStorage('follows', JSON.stringify([]));
+    }
+
+    // Fix any users without usernames
+    const users = JSON.parse(getFromStorage('users'));
+    let hasChanges = false;
+
+    for (let i = 0; i < users.length; i++) {
+      if (!users[i].username && users[i].email) {
+        console.log(`Fixing user ${users[i].id} missing username`);
+        users[i].username = users[i].email.split('@')[0];
+        hasChanges = true;
+      }
+    }
+
+    if (hasChanges) {
+      console.log('Saving fixed users to localStorage');
+      setToStorage('users', JSON.stringify(users));
     }
     // Reading stats functionality removed
     if (!getFromStorage('categories')) {
@@ -569,8 +587,25 @@ export const profileService = {
   // Get user by username
   async getUserByUsername(username) {
     try {
+      if (!username) {
+        console.error('getUserByUsername called with no username');
+        return null;
+      }
+
+      console.log('Getting user by username:', username);
       const users = JSON.parse(getFromStorage('users'));
-      return users.find(user => user.username === username) || null;
+      console.log('Total users in storage:', users.length);
+
+      const user = users.find(user => user.username === username);
+      if (user) {
+        console.log('Found user:', user.id, user.username);
+      } else {
+        console.error('No user found with username:', username);
+        // Log all usernames to help debug
+        console.log('Available usernames:', users.map(u => u.username));
+      }
+
+      return user || null;
     } catch (error) {
       console.error('Error fetching user by username:', error);
       return null;

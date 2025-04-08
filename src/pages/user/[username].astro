@@ -8,11 +8,22 @@ export const prerender = false;
 
 // Get the username from the URL parameters
 const { username } = Astro.params;
+
+// If username is undefined or 'undefined', redirect to home
+if (!username || username === 'undefined') {
+    return Astro.redirect('/');
+}
 ---
 
 <Layout title={`${username} - ABlog`} description={`View ${username}'s profile and posts on ABlog`}>
     <section class="py-12">
         <div class="container mx-auto px-4">
+            <script define:vars={{ username }}>
+                // Check if the username is valid
+                if (!username || username === 'undefined') {
+                    window.location.href = '/';
+                }
+            </script>
             <ClientUserProfileWrapper username={username} client:only="react" />
         </div>
     </section>

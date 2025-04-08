@@ -12,6 +12,7 @@ export default function CurrentUserProfile() {
       try {
         setLoading(true);
         const user = authService.getCurrentUser();
+        console.log('Current user from auth service:', user);
 
         if (!user) {
           setError('You must be logged in to view your profile');
@@ -23,6 +24,14 @@ export default function CurrentUserProfile() {
           return;
         }
 
+        if (!user.username) {
+          console.error('User has no username:', user);
+          setError('Your profile is missing a username. Please contact support.');
+          setLoading(false);
+          return;
+        }
+
+        console.log('Setting current user with username:', user.username);
         setCurrentUser(user);
         setLoading(false);
       } catch (err) {

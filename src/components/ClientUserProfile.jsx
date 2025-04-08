@@ -32,16 +32,26 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
   useEffect(() => {
     // Get the current user from localStorage
     const currentUser = authService.getCurrentUser();
+    console.log('Current user in ClientUserProfile:', currentUser);
     setUser(currentUser);
 
     const fetchProfile = async () => {
       try {
         setLoading(true);
 
+        if (!username) {
+          console.error('No username provided to ClientUserProfile');
+          setError('Username is required to view a profile');
+          setLoading(false);
+          return;
+        }
+
+        console.log('Fetching profile for username:', username);
         // Fetch profile by username
         const profileData = await profileService.getUserByUsername(username);
 
         if (!profileData) {
+          console.error('No profile found for username:', username);
           setError('User not found');
           setLoading(false);
           return;
@@ -454,6 +464,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                       <CloudinaryUploader
                         onImageSelect={(imageUrl) => {
                           if (imageUrl) {
+                            console.log('Profile picture selected:', imageUrl);
                             // Set the image URL directly - no need for adjustment with Cloudinary
                             const hiddenInput = document.getElementById('avatar_url');
                             if (hiddenInput) hiddenInput.value = imageUrl;
@@ -501,6 +512,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                       <CloudinaryUploader
                         onImageSelect={(imageUrl) => {
                           if (imageUrl) {
+                            console.log('Cover image selected:', imageUrl);
                             // Set the image URL directly - no need for adjustment with Cloudinary
                             const hiddenInput = document.getElementById('cover_image');
                             if (hiddenInput) hiddenInput.value = imageUrl;
