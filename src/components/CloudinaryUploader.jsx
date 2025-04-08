@@ -27,7 +27,7 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
       script.async = true;
       script.onload = initializeWidget;
       document.body.appendChild(script);
-      
+
       return () => {
         document.body.removeChild(script);
       };
@@ -40,8 +40,8 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
     if (window.cloudinary) {
       cloudinaryWidget.current = window.cloudinary.createUploadWidget(
         {
-          cloudName: import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'demo',
-          uploadPreset: import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default',
+          cloudName: import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'dvrnheiru',
+          uploadPreset: import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ablog_upload',
           sources: ['local', 'url', 'camera'],
           multiple: false,
           cropping: true,
@@ -69,6 +69,7 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
         (error, result) => {
           if (!error && result && result.event === "success") {
             const imageUrl = result.info.secure_url;
+            console.log('Cloudinary upload successful:', imageUrl);
             setPreview(imageUrl);
             setError('');
             if (onImageSelect) {

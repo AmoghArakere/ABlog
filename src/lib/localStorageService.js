@@ -1,5 +1,4 @@
 import { getImageUrl } from './imageUtils';
-import { uploadProfileImage, uploadCoverImage, uploadPostImage } from './cloudinaryService';
 
 // Generate a random ID
 const generateId = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
@@ -285,19 +284,10 @@ export const blogService = {
         allTags.find(tag => tag.id === tagId)
       ).filter(Boolean);
 
-      // Upload cover image to Cloudinary if provided
-      let cloudinaryCoverImage = cover_image;
+      // Use the cover image URL directly (it should already be a Cloudinary URL from the frontend)
+      let processedCoverImage = cover_image;
       if (cover_image) {
-        try {
-          console.log('Uploading post cover image to Cloudinary...');
-          const postId = generateId(); // Generate ID early for the upload
-          cloudinaryCoverImage = await uploadPostImage(cover_image, postId);
-          console.log('Post cover image upload result:', cloudinaryCoverImage);
-        } catch (error) {
-          console.error('Error uploading post cover image to Cloudinary:', error);
-          // Keep the original URL if upload fails
-          cloudinaryCoverImage = cover_image;
-        }
+        console.log('Using post cover image URL:', cover_image.substring(0, 50) + '...');
       }
 
       // Process content to preserve line breaks
@@ -321,7 +311,7 @@ export const blogService = {
         slug,
         content: processedContent,
         excerpt: excerpt || title.substring(0, 150) + '...',
-        cover_image: cloudinaryCoverImage,
+        cover_image: processedCoverImage,
         author_id,
         categories: postCategories,
         tags: postTags,
@@ -373,18 +363,10 @@ export const blogService = {
       }
       if (excerpt) post.excerpt = excerpt;
 
-      // Upload cover image to Cloudinary if provided
+      // Use the cover image URL directly (it should already be a Cloudinary URL from the frontend)
       if (cover_image && cover_image !== post.cover_image) {
-        try {
-          console.log('Uploading updated post cover image to Cloudinary...');
-          const cloudinaryCoverImage = await uploadPostImage(cover_image, post.id);
-          console.log('Updated post cover image upload result:', cloudinaryCoverImage);
-          post.cover_image = cloudinaryCoverImage;
-        } catch (error) {
-          console.error('Error uploading updated post cover image to Cloudinary:', error);
-          // Keep the original URL if upload fails
-          post.cover_image = cover_image;
-        }
+        console.log('Using updated post cover image URL:', cover_image.substring(0, 50) + '...');
+        post.cover_image = cover_image;
       }
 
       if (status) post.status = status;
@@ -534,40 +516,26 @@ export const profileService = {
         }
       }
 
-      // Upload images to Cloudinary
-      let cloudinaryAvatarUrl = avatar_url;
-      let cloudinaryCoverImage = cover_image;
+      // Use the image URLs directly (they should already be Cloudinary URLs from the frontend)
+      let processedAvatarUrl = avatar_url;
+      let processedCoverImage = cover_image;
 
       if (avatar_url && avatar_url !== user.avatar_url) {
-        console.log('Uploading avatar to Cloudinary...');
-        try {
-          cloudinaryAvatarUrl = await uploadProfileImage(avatar_url, userId);
-          console.log('Avatar upload result:', cloudinaryAvatarUrl);
-        } catch (error) {
-          console.error('Error uploading avatar image to Cloudinary:', error);
-          // Keep the original URL if upload fails
-          cloudinaryAvatarUrl = avatar_url;
-        }
+        console.log('Using avatar URL:', avatar_url.substring(0, 50) + '...');
+        processedAvatarUrl = avatar_url;
       }
 
       if (cover_image && cover_image !== user.cover_image) {
-        console.log('Uploading cover image to Cloudinary...');
-        try {
-          cloudinaryCoverImage = await uploadCoverImage(cover_image, userId);
-          console.log('Cover image upload result:', cloudinaryCoverImage);
-        } catch (error) {
-          console.error('Error uploading cover image to Cloudinary:', error);
-          // Keep the original URL if upload fails
-          cloudinaryCoverImage = cover_image;
-        }
+        console.log('Using cover image URL:', cover_image.substring(0, 50) + '...');
+        processedCoverImage = cover_image;
       }
 
       // Update user fields
       if (username) user.username = username;
       if (full_name) user.full_name = full_name;
       if (bio !== undefined) user.bio = bio;
-      if (cloudinaryAvatarUrl) user.avatar_url = cloudinaryAvatarUrl;
-      if (cloudinaryCoverImage !== undefined) user.cover_image = cloudinaryCoverImage;
+      if (processedAvatarUrl) user.avatar_url = processedAvatarUrl;
+      if (processedCoverImage !== undefined) user.cover_image = processedCoverImage;
       if (website !== undefined) user.website = website;
       if (location !== undefined) user.location = location;
 
@@ -581,8 +549,8 @@ export const profileService = {
         if (username) updatedCurrentUser.username = username;
         if (full_name) updatedCurrentUser.full_name = full_name;
         if (bio !== undefined) updatedCurrentUser.bio = bio;
-        if (cloudinaryAvatarUrl) updatedCurrentUser.avatar_url = cloudinaryAvatarUrl;
-        if (cloudinaryCoverImage !== undefined) updatedCurrentUser.cover_image = cloudinaryCoverImage;
+        if (processedAvatarUrl) updatedCurrentUser.avatar_url = processedAvatarUrl;
+        if (processedCoverImage !== undefined) updatedCurrentUser.cover_image = processedCoverImage;
         if (website !== undefined) updatedCurrentUser.website = website;
         if (location !== undefined) updatedCurrentUser.location = location;
 
