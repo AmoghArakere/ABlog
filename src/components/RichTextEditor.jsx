@@ -153,10 +153,10 @@ export default function RichTextEditor({ content, onChange }) {
     html = html.replace(/^(?!<[a-z]).+$/gm, '<p class="my-2">$&</p>');
 
     // Make sure paragraphs have proper spacing
-    html = html.replace(/<p class="my-2">/g, '<p class="my-2" style="margin: 0.5rem 0; line-height: 1.5;">');
+    html = html.replace(/<p class="my-2">/g, '<p class="my-2" style="margin: 0.25rem 0; line-height: 1.2;">');
 
     // Ensure double line breaks create proper paragraph spacing
-    html = html.replace(/\n\n+/g, '</p>\n\n<p class="my-2" style="margin: 0.5rem 0; line-height: 1.5;">');
+    html = html.replace(/\n\n+/g, '</p>\n\n<p class="my-2" style="margin: 0.25rem 0; line-height: 1.2;">');
 
     // Fix any remaining line breaks that should be visible
     html = html.replace(/\n(?!<)/g, '<br>');
@@ -317,7 +317,7 @@ export default function RichTextEditor({ content, onChange }) {
           placeholder="Write your content here using Markdown..."
         />
       ) : (
-        <div className="w-full min-h-[400px] p-4 prose max-w-none overflow-auto bg-gray-800 text-white" style={{ lineHeight: 1.5 }}>
+        <div className="w-full min-h-[400px] p-4 prose max-w-none overflow-auto bg-gray-800 text-white" style={{ lineHeight: 1.2 }}>
           <style>
             {`
               /* Ensure images display properly in the preview */
@@ -381,7 +381,7 @@ export default function RichTextEditor({ content, onChange }) {
               /* Ensure paragraphs display properly */
               .preview-content p {
                 margin: 0.25rem 0 !important;
-                line-height: 1.4 !important;
+                line-height: 1.2 !important;
               }
 
               /* Ensure links display properly */

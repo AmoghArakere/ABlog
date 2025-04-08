@@ -22,8 +22,8 @@
 }
 
 .blog-content p {
-  margin-bottom: 0.5rem !important;
-  line-height: 1.4 !important;
+  margin-bottom: 0.25rem !important;
+  line-height: 1.2 !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -156,7 +156,7 @@
 
 /* Fix spacing between elements */
 .blog-content * + * {
-  margin-top: 0.5rem !important;
+  margin-top: 0.25rem !important;
 }
 
 /* Make bold text white in dark mode */
@@ -182,25 +182,25 @@
 }
 
 .blog-content p + p {
-  margin-top: 0.5rem !important;
+  margin-top: 0.25rem !important;
 }
 
 .blog-content h1 + p,
 .blog-content h2 + p,
 .blog-content h3 + p {
-  margin-top: 0.5rem !important;
+  margin-top: 0.25rem !important;
 }
 
 .blog-content ul + p,
 .blog-content ol + p,
 .blog-content blockquote + p,
 .blog-content pre + p {
-  margin-top: 0.5rem !important;
+  margin-top: 0.25rem !important;
 }
 
 .blog-content p + ul,
 .blog-content p + ol,
 .blog-content p + blockquote,
 .blog-content p + pre {
-  margin-top: 0.5rem !important;
+  margin-top: 0.25rem !important;
 }
