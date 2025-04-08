@@ -133,15 +133,27 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     if ((!user || user.id !== profile.id) && !isCurrentUser) return;
 
     const formData = new FormData(e.target);
-    const updatedProfile = {
-      username: formData.get('username'),
-      full_name: formData.get('fullName'),
-      bio: formData.get('bio'),
-      avatar_url: formData.get('avatar_url'),
-      cover_image: formData.get('cover_image'),
-      website: formData.get('website'),
-      location: formData.get('location')
-    };
+
+    // Get values from form
+    const username = formData.get('username');
+    const full_name = formData.get('fullName');
+    const bio = formData.get('bio');
+    const avatar_url = formData.get('avatar_url');
+    const cover_image = formData.get('cover_image');
+    const website = formData.get('website');
+    const location = formData.get('location');
+
+    // Only include fields that have changed
+    const updatedProfile = {};
+    if (username !== profile.username) updatedProfile.username = username;
+    if (full_name !== profile.full_name) updatedProfile.full_name = full_name;
+    if (bio !== profile.bio) updatedProfile.bio = bio;
+    if (avatar_url !== profile.avatar_url) updatedProfile.avatar_url = avatar_url;
+    if (cover_image !== profile.cover_image) updatedProfile.cover_image = cover_image;
+    if (website !== profile.website) updatedProfile.website = website;
+    if (location !== profile.location) updatedProfile.location = location;
+
+    console.log('Updating profile with:', updatedProfile);
 
     // Check if username is being changed
     const usernameChanged = updatedProfile.username !== profile.username;
@@ -446,7 +458,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                             const hiddenInput = document.getElementById('avatar_url');
                             if (hiddenInput) hiddenInput.value = imageUrl;
 
-                            // Update preview
+                            // Update ONLY profile picture previews
                             const previewImg = document.querySelector('.preview-profile-pic');
                             if (previewImg) {
                               previewImg.src = imageUrl;
@@ -460,6 +472,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                         initialImage={profile.avatar_url}
                         aspectRatio={1}
                         imageType="profile"
+                        uniqueId="profile-pic-uploader"
                       />
                       {profile.avatar_url && (
                         <div className="mt-2">
@@ -492,7 +505,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                             const hiddenInput = document.getElementById('cover_image');
                             if (hiddenInput) hiddenInput.value = imageUrl;
 
-                            // Update preview
+                            // Update ONLY cover image previews
                             const previewImg = document.querySelector('.preview-cover-image');
                             if (previewImg) {
                               previewImg.src = imageUrl;
@@ -506,6 +519,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                         initialImage={profile.cover_image}
                         aspectRatio={3}
                         imageType="cover"
+                        uniqueId="cover-image-uploader"
                       />
                       {profile.cover_image && (
                         <div className="mt-2">

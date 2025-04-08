@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload Image", initialImage = null, aspectRatio = 1, imageType = "profile" }) {
+export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload Image", initialImage = null, aspectRatio = 1, imageType = "profile", uniqueId = Math.random().toString(36).substring(7) }) {
   const [preview, setPreview] = useState(initialImage);
   const [error, setError] = useState('');
   const [isUploading, setIsUploading] = useState(false);

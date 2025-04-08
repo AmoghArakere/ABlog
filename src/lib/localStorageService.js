@@ -517,25 +517,27 @@ export const profileService = {
       }
 
       // Use the image URLs directly (they should already be Cloudinary URLs from the frontend)
-      let processedAvatarUrl = avatar_url;
-      let processedCoverImage = cover_image;
+      let processedAvatarUrl = null;
+      let processedCoverImage = null;
 
+      // Only process avatar URL if it's provided and different from current
       if (avatar_url && avatar_url !== user.avatar_url) {
-        console.log('Using avatar URL:', avatar_url.substring(0, 50) + '...');
+        console.log('Using new avatar URL:', avatar_url.substring(0, 50) + '...');
         processedAvatarUrl = avatar_url;
       }
 
+      // Only process cover image if it's provided and different from current
       if (cover_image && cover_image !== user.cover_image) {
-        console.log('Using cover image URL:', cover_image.substring(0, 50) + '...');
+        console.log('Using new cover image URL:', cover_image.substring(0, 50) + '...');
         processedCoverImage = cover_image;
       }
 
-      // Update user fields
+      // Update user fields - only update fields that were provided
       if (username) user.username = username;
       if (full_name) user.full_name = full_name;
       if (bio !== undefined) user.bio = bio;
-      if (processedAvatarUrl) user.avatar_url = processedAvatarUrl;
-      if (processedCoverImage !== undefined) user.cover_image = processedCoverImage;
+      if (processedAvatarUrl) user.avatar_url = processedAvatarUrl; // Only update if new avatar was provided
+      if (processedCoverImage) user.cover_image = processedCoverImage; // Only update if new cover was provided
       if (website !== undefined) user.website = website;
       if (location !== undefined) user.location = location;
 
@@ -549,8 +551,8 @@ export const profileService = {
         if (username) updatedCurrentUser.username = username;
         if (full_name) updatedCurrentUser.full_name = full_name;
         if (bio !== undefined) updatedCurrentUser.bio = bio;
-        if (processedAvatarUrl) updatedCurrentUser.avatar_url = processedAvatarUrl;
-        if (processedCoverImage !== undefined) updatedCurrentUser.cover_image = processedCoverImage;
+        if (processedAvatarUrl) updatedCurrentUser.avatar_url = processedAvatarUrl; // Only update if new avatar was provided
+        if (processedCoverImage) updatedCurrentUser.cover_image = processedCoverImage; // Only update if new cover was provided
         if (website !== undefined) updatedCurrentUser.website = website;
         if (location !== undefined) updatedCurrentUser.location = location;
 
