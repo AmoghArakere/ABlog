@@ -81,7 +81,52 @@ export default function RichTextEditor({ content, onChange }) {
   const handleCode = () => wrapSelectedText('`', '`');
   const handleCodeBlock = () => wrapSelectedText('\n```\n', '\n```');
 
-  // Image insertion removed
+  const handleImage = () => {
+    // Create a Cloudinary widget for image upload
+    if (typeof window !== 'undefined' && window.cloudinary) {
+      const widget = window.cloudinary.createUploadWidget(
+        {
+          cloudName: import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'dvrnheiru',
+          uploadPreset: import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ablog_upload',
+          sources: ['local', 'url', 'camera'],
+          multiple: false,
+          folder: 'ablog/posts',
+          maxFileSize: 5000000, // 5MB
+          styles: {
+            palette: {
+              window: "#000000",
+              sourceBg: "#222222",
+              windowBorder: "#555555",
+              tabIcon: "#FFFFFF",
+              inactiveTabIcon: "#AAAAAA",
+              menuIcons: "#CCCCCC",
+              link: "#8A46F0",
+              action: "#8A46F0",
+              inProgress: "#8A46F0",
+              complete: "#33ff00",
+              error: "#EA2727",
+              textDark: "#000000",
+              textLight: "#FFFFFF"
+            }
+          }
+        },
+        (error, result) => {
+          if (!error && result && result.event === "success") {
+            const imageUrl = result.info.secure_url;
+            const imageAlt = result.info.original_filename || 'Image';
+            insertAtCursor(`![${imageAlt}](${imageUrl})`);
+          }
+        }
+      );
+      widget.open();
+    } else {
+      // Fallback for when Cloudinary is not available
+      const imageUrl = prompt('Enter image URL:');
+      if (imageUrl) {
+        insertAtCursor(`![Image](${imageUrl})`);
+      }
+    }
+  }
 
   const handleQuote = () => {
     const selected = getSelectedText();
@@ -263,7 +308,16 @@ export default function RichTextEditor({ content, onChange }) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
             </button>
-            {/* Image insertion button removed */}
+            <button
+              type="button"
+              onClick={handleImage}
+              className="p-1 hover:bg-gray-600 rounded text-white"
+              title="Insert Image"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </button>
             <button
               type="button"
               onClick={handleQuote}
