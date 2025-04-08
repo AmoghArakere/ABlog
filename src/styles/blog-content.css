@@ -22,8 +22,9 @@
 }
 
 .blog-content p {
-  margin-bottom: 0.25rem !important;
-  line-height: 1.2 !important;
+  margin-bottom: 0.15rem !important;
+  margin-top: 0.15rem !important;
+  line-height: 1.1 !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -35,9 +36,10 @@
 .blog-content h1,
 .blog-content h2,
 .blog-content h3 {
-  margin-top: 1.5rem !important;
-  margin-bottom: 1rem !important;
+  margin-top: 1rem !important;
+  margin-bottom: 0.5rem !important;
   font-weight: 600 !important;
+  line-height: 1.1 !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -64,7 +66,8 @@
 
 .blog-content ul,
 .blog-content ol {
-  margin-bottom: 1rem !important;
+  margin-bottom: 0.5rem !important;
+  margin-top: 0.25rem !important;
   padding-left: 1.5rem !important;
 }
 
@@ -77,7 +80,8 @@
 }
 
 .blog-content li {
-  margin-bottom: 0.5rem !important;
+  margin-bottom: 0.2rem !important;
+  line-height: 1.1 !important;
 }
 
 .blog-content blockquote {
@@ -156,7 +160,17 @@
 
 /* Fix spacing between elements */
 .blog-content * + * {
-  margin-top: 0.25rem !important;
+  margin-top: 0.1rem !important;
+}
+
+/* Compact bullet points */
+.blog-content ul li::before {
+  content: "•";
+  display: inline-block;
+  width: 1em;
+  margin-left: -1em;
+  font-size: 0.8em;
+  vertical-align: middle;
 }
 
 /* Make bold text white in dark mode */
@@ -182,25 +196,25 @@
 }
 
 .blog-content p + p {
-  margin-top: 0.25rem !important;
+  margin-top: 0.1rem !important;
 }
 
 .blog-content h1 + p,
 .blog-content h2 + p,
 .blog-content h3 + p {
-  margin-top: 0.25rem !important;
+  margin-top: 0.1rem !important;
 }
 
 .blog-content ul + p,
 .blog-content ol + p,
 .blog-content blockquote + p,
 .blog-content pre + p {
-  margin-top: 0.25rem !important;
+  margin-top: 0.1rem !important;
 }
 
 .blog-content p + ul,
 .blog-content p + ol,
 .blog-content p + blockquote,
 .blog-content p + pre {
-  margin-top: 0.25rem !important;
+  margin-top: 0.1rem !important;
 }
