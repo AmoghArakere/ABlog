@@ -496,12 +496,22 @@ export const profileService = {
   // Update user profile
   async updateProfile(userId, { username, full_name, bio, avatar_url, cover_image, website, location }) {
     try {
+      console.log('updateProfile called with:', {
+        userId,
+        avatar_url: avatar_url ? (typeof avatar_url === 'string' ? `${avatar_url.substring(0, 30)}...` : '[non-string value]') : null,
+        cover_image: cover_image ? (typeof cover_image === 'string' ? `${cover_image.substring(0, 30)}...` : '[non-string value]') : null
+      });
+
       const users = JSON.parse(getFromStorage('users'));
       const userIndex = users.findIndex(user => user.id === userId);
 
-      if (userIndex === -1) return null;
+      if (userIndex === -1) {
+        console.error('User not found:', userId);
+        return null;
+      }
 
       const user = users[userIndex];
+      console.log('Found user:', user.username);
 
       // Check if username is being changed and if it's already taken by another user
       if (username && username !== user.username) {
@@ -517,13 +527,27 @@ export const profileService = {
       let processedCoverImage = cover_image;
 
       if (avatar_url && avatar_url !== user.avatar_url) {
-        processedAvatarUrl = await processImageForStorage(avatar_url);
-        console.log('Processed avatar URL for storage:', processedAvatarUrl ? 'Success' : 'Failed');
+        console.log('Processing avatar URL for storage...');
+        try {
+          processedAvatarUrl = await processImageForStorage(avatar_url);
+          console.log('Avatar processing result:', processedAvatarUrl ? 'Success' : 'Failed');
+        } catch (error) {
+          console.error('Error processing avatar image:', error);
+          // Keep the original URL if processing fails
+          processedAvatarUrl = avatar_url;
+        }
       }
 
       if (cover_image && cover_image !== user.cover_image) {
-        processedCoverImage = await processImageForStorage(cover_image);
-        console.log('Processed cover image for storage:', processedCoverImage ? 'Success' : 'Failed');
+        console.log('Processing cover image for storage...');
+        try {
+          processedCoverImage = await processImageForStorage(cover_image);
+          console.log('Cover image processing result:', processedCoverImage ? 'Success' : 'Failed');
+        } catch (error) {
+          console.error('Error processing cover image:', error);
+          // Keep the original URL if processing fails
+          processedCoverImage = cover_image;
+        }
       }
 
       // Update user fields
