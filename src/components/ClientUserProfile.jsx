@@ -481,12 +481,11 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                     <label htmlFor="avatar_upload" className="block text-sm font-medium mb-2 dark:text-blue-300">Profile Picture</label>
                     <input type="hidden" name="avatar_url" id="avatar_url" value={profile.avatar_url || ''} />
                     <div className="space-y-4">
-                      {/* Try the direct image uploader instead of Cloudinary */}
-                      <DirectImageUploader
+                      <CloudinaryUploader
                         onImageSelect={(imageUrl) => {
                           if (imageUrl) {
                             console.log('Profile picture selected:', imageUrl);
-                            // Set the image URL directly
+                            // Set the image URL directly - no need for adjustment with Cloudinary
                             const hiddenInput = document.getElementById('avatar_url');
                             if (hiddenInput) hiddenInput.value = imageUrl;
 
@@ -502,6 +501,9 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                         }}
                         buttonText="Upload Profile Picture"
                         initialImage={profile.avatar_url}
+                        aspectRatio={1}
+                        imageType="profile"
+                        uniqueId="profile-pic-uploader"
                       />
                       {profile.avatar_url && (
                         <div className="mt-2">
@@ -527,12 +529,11 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                     <label htmlFor="cover_image" className="block text-sm font-medium mb-2 dark:text-blue-300">Cover Image</label>
                     <input type="hidden" name="cover_image" id="cover_image" value={profile.cover_image || ''} />
                     <div className="space-y-4">
-                      {/* Try the direct image uploader instead of Cloudinary */}
-                      <DirectImageUploader
+                      <CloudinaryUploader
                         onImageSelect={(imageUrl) => {
                           if (imageUrl) {
                             console.log('Cover image selected:', imageUrl);
-                            // Set the image URL directly
+                            // Set the image URL directly - no need for adjustment with Cloudinary
                             const hiddenInput = document.getElementById('cover_image');
                             if (hiddenInput) hiddenInput.value = imageUrl;
 
@@ -548,6 +549,9 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                         }}
                         buttonText="Upload Cover Image"
                         initialImage={profile.cover_image}
+                        aspectRatio={3}
+                        imageType="cover"
+                        uniqueId="cover-image-uploader"
                       />
                       {profile.cover_image && (
                         <div className="mt-2">
