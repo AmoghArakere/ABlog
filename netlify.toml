@@ -9,9 +9,3 @@
   command = "npm run dev"
   port = 4321
   targetPort = 4321
-
-# Handle client-side routing
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
