@@ -92,7 +92,6 @@ export default function RichTextEditor({ content, onChange }) {
           multiple: false,
           folder: 'ablog/posts',
           maxFileSize: 5000000, // 5MB
-          debug: true,
           styles: {
             palette: {
               window: "#000000",

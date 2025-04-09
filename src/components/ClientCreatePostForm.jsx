@@ -236,7 +236,6 @@ export default function ClientCreatePostForm() {
               initialImage={coverImage}
               aspectRatio={16/9}
               imageType="post"
-              uniqueId="post-cover-image-uploader"
             />
           </div>
 
