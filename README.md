@@ -24,7 +24,7 @@ ABlog is a modern, feature-rich blogging platform built with Astro.js, offering 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Astro.js, React, Tailwind CSS
-- **UI Components**: shadcn/ui (Magic UI)
+- **UI Components**: shadcn / Magic UI
 - **Authentication**: NextAuth.js
 - **Image Storage**: Cloudinary
 - **Comments**: Giscus
