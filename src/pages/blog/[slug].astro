@@ -1,0 +1,151 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+// Format date function
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+// Calculate read time function
+const calculateReadTime = (content) => {
+  const wordsPerMinute = 200;
+  const words = content.trim().split(/\s+/).length;
+  const readTime = Math.ceil(words / wordsPerMinute);
+  return readTime > 0 ? readTime : 1; // Minimum 1 minute read time
+};
+
+// Enable static prerendering
+export const prerender = true;
+
+// Generate static paths for all blog posts
+export async function getStaticPaths() {
+  const blogEntries = await getCollection('blog', ({ data }) => {
+    return !data.draft;
+  });
+  
+  return blogEntries.map(entry => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+// Get the blog post data
+const { entry } = Astro.props;
+
+// Handle case where entry is undefined
+if (!entry) {
+  return Astro.redirect('/blog');
+}
+
+// Render the content
+let Content;
+let renderError = false;
+try {
+  const renderResult = await entry.render();
+  Content = renderResult.Content;
+} catch (error) {
+  console.error('Error rendering content:', error);
+  renderError = true;
+}
+
+// Get author information
+let authorData = null;
+try {
+  if (entry.data.author) {
+    authorData = await getEntry('authors', entry.data.author);
+  }
+} catch (error) {
+  console.error(`Author not found: ${entry.data.author}`);
+}
+
+// Calculate read time
+const readTime = entry.body ? calculateReadTime(entry.body) : 0;
+---
+
+<Layout title={`${entry.data.title} - ABlog`} description={entry.data.description}>
+  <article class="py-12">
+    <div class="container mx-auto px-4 max-w-4xl">
+      <header class="mb-8">
+        {entry.data.categories && entry.data.categories.length > 0 && (
+          <div class="mb-4 flex flex-wrap gap-2">
+            {entry.data.categories.map((category) => (
+              <span class="text-sm px-3 py-1 bg-purple-900/50 text-purple-200 rounded-full">
+                {category}
+              </span>
+            ))}
+          </div>
+        )}
+        
+        <h1 class="text-4xl font-bold mb-4 text-white">{entry.data.title}</h1>
+        
+        <p class="text-xl text-gray-300 mb-6">{entry.data.description}</p>
+        
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center">
+            {authorData?.data.avatar ? (
+              <img 
+                src={authorData.data.avatar} 
+                alt={authorData.data.name}
+                class="w-12 h-12 rounded-full mr-4 object-cover"
+              />
+            ) : (
+              <div class="w-12 h-12 rounded-full mr-4 bg-purple-700 flex items-center justify-center">
+                <span class="text-white font-bold">
+                  {authorData?.data.name.charAt(0) || entry.data.author.charAt(0)}
+                </span>
+              </div>
+            )}
+            
+            <div>
+              <p class="font-medium text-white">
+                {authorData?.data.name || entry.data.author}
+              </p>
+              <p class="text-sm text-gray-400">
+                {formatDate(entry.data.pubDate)} · {readTime} min read
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        {entry.data.heroImage && (
+          <div class="rounded-lg overflow-hidden mb-10 max-h-[500px]">
+            <img 
+              src={entry.data.heroImage} 
+              alt={entry.data.title}
+              class="w-full h-full object-cover"
+            />
+          </div>
+        )}
+      </header>
+      
+      <div class="prose prose-lg max-w-none prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400 prose-strong:text-white prose-code:text-purple-300 prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-700">
+        {renderError ? (
+          <div class="p-4 bg-red-900/30 border border-red-700 rounded-md">
+            <h2 class="text-xl font-bold text-red-400 mb-2">Error Rendering Content</h2>
+            <p class="text-gray-300">There was an error rendering this blog post. Please try again later or contact the site administrator.</p>
+          </div>
+        ) : (
+          <Content />
+        )}
+      </div>
+      
+      {entry.data.tags && entry.data.tags.length > 0 && (
+        <div class="mt-12 pt-6 border-t border-gray-700">
+          <h3 class="text-lg font-medium mb-4 text-white">Tags</h3>
+          <div class="flex flex-wrap gap-2">
+            {entry.data.tags.map((tag) => (
+              <span class="text-sm px-3 py-1 bg-gray-800 text-gray-300 rounded-full">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </article>
+</Layout>

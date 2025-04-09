@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import BlogPostPreview from '../../components/BlogPostPreview.astro';
+
+// Get all blog posts that are not drafts
+const posts = await getCollection('blog', ({ data }) => {
+  return !data.draft;
+});
+
+// Sort posts by publication date (newest first)
+const sortedPosts = posts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<Layout title="Blog - ABlog" description="Read the latest articles on ABlog">
+  <section class="py-12">
+    <div class="container mx-auto px-4">
+      <h1 class="text-4xl font-bold mb-8 text-white">Latest Articles</h1>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {sortedPosts.map((post) => (
+          <BlogPostPreview post={post} />
+        ))}
+      </div>
+      
+      {sortedPosts.length === 0 && (
+        <div class="text-center py-12">
+          <p class="text-gray-400 text-lg">No posts found. Check back soon!</p>
+        </div>
+      )}
+    </div>
+  </section>
+</Layout>

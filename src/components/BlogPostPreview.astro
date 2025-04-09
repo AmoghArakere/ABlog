@@ -1,0 +1,46 @@
+---
+import { formatDate } from '../utils/dateUtils';
+
+const { post } = Astro.props;
+const { slug } = post;
+const { title, description, pubDate, heroImage, categories, author } = post.data;
+---
+
+<article class="bg-gray-800 rounded-lg overflow-hidden shadow-lg transition-transform hover:scale-[1.01]">
+  <a href={`/blog/${slug}`} class="block">
+    {heroImage && (
+      <div class="relative h-48 overflow-hidden">
+        <img
+          src={heroImage}
+          alt={title}
+          class="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = '/images/placeholder-blog.svg';
+          }}
+        />
+      </div>
+    )}
+    <div class="p-6">
+      {categories && categories.length > 0 && (
+        <div class="mb-2 flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <span class="text-xs px-2 py-1 bg-purple-900/50 text-purple-200 rounded-full">
+              {category}
+            </span>
+          ))}
+        </div>
+      )}
+      <h2 class="text-xl font-bold mb-2 text-white">{title}</h2>
+      <p class="text-gray-300 mb-4 line-clamp-2">{description}</p>
+      <div class="flex items-center justify-between">
+        <div class="text-sm text-gray-400">
+          {formatDate(pubDate)}
+        </div>
+        <div class="text-sm text-gray-400">
+          By {author}
+        </div>
+      </div>
+    </div>
+  </a>
+</article>

@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import HomeHero from '../components/HomeHero';
 import FeaturedPosts from '../components/FeaturedPosts';
+import StaticFeaturedPosts from '../components/StaticFeaturedPosts.astro';
 import CategorySection from '../components/CategorySection';
 import AuthCTA from '../components/AuthCTA';
 ---
@@ -95,7 +96,7 @@ import AuthCTA from '../components/AuthCTA';
 				<p class="text-xl text-gray-300 max-w-3xl mx-auto">Discover trending articles from our community</p>
 			</div>
 
-			<FeaturedPosts client:only="react" />
+			<StaticFeaturedPosts />
 		</div>
 	</section>
 
