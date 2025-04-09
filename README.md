@@ -1,6 +1,6 @@
 # ABlog - Modern Blogging Platform
+![image](https://github.com/user-attachments/assets/e80fd909-b062-4bdc-abcc-5eba0ea34b87)
 
-![ABlog Logo](public/images/ablog-logo.svg)
 
 ABlog is a modern, feature-rich blogging platform built with Astro.js, offering a seamless writing and reading experience. With its clean, dark-themed UI and powerful features, ABlog provides everything you need to create, share, and discover engaging content.
 
@@ -28,26 +28,3 @@ ABlog is a modern, feature-rich blogging platform built with Astro.js, offering 
 - **Authentication**: NextAuth.js
 - **Image Storage**: Cloudinary
 - **Comments**: Giscus
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command           | Action                                       |
-| :---------------- | :------------------------------------------- |
-| `npm install`     | Installs dependencies                        |
-| `npm run dev`     | Starts local dev server at `localhost:4321`  |
-| `npm run build`   | Build your production site to `./dist/`      |
-| `npm run preview` | Preview your build locally, before deploying |
-
-## 👤 Author
-
-**Amogh Arakere**
-
-- GitHub: [AmoghArakere](https://github.com/AmoghArakere)
-- LinkedIn: [Amogh Arakere](https://www.linkedin.com/in/amogh07/)
-- Twitter: [@nrupatungaa](https://x.com/nrupatungaa)
-
-## 📝 License
-
-This project is licensed under the MIT License.
