@@ -423,14 +423,14 @@ export default function ClientBlogPost({ slug }) {
             </div>
             <div className="ml-3">
               <a href={`/user/${post.author && post.author.username ? post.author.username : ''}`} className="text-sm font-medium hover:underline dark:text-text-dark dark:hover:text-purple-400">
-                {post.author ? (post.author.full_name || post.author.username || 'Anonymous') : (post.author_id ? 'Author' : 'Anonymous')}
+                {post.author ? (post.author.full_name || post.author.username || 'Amogh') : 'Amogh'}
               </a>
               <p className="text-xs text-text-muted dark:text-text-dark-muted">
                 {post.created_at ? new Date(post.created_at).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric'
-                }) : 'Unknown date'}
+                }) : 'Apr 10, 2025'}
               </p>
             </div>
           </div>
@@ -619,8 +619,7 @@ export default function ClientBlogPost({ slug }) {
           <div className="ml-4">
             <h3 className="text-xl font-semibold dark:text-white">
               <a href={post.author && post.author.username ? `/user/${post.author.username}` : '#'} className="hover:underline hover:text-purple-500">
-                {post.author ? (post.author.full_name || post.author.username || 'Anonymous') :
-                  (post.author_id ? post.author_name || 'Author' : 'Anonymous')}
+                {post.author ? (post.author.full_name || post.author.username || 'Amogh') : 'Amogh'}
               </a>
             </h3>
             {post.author && post.author.bio && <p className="text-text-muted dark:text-gray-400 mt-1">{post.author.bio}</p>}
