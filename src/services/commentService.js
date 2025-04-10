@@ -93,21 +93,28 @@ const commentService = {
   // Add a comment to a post
   async addComment(postId, authorId, content) {
     try {
+      console.log(`Adding comment to post ${postId} by user ${authorId}`);
+
       // Check if post exists
+      console.log('Checking if post exists...');
       const postCheck = await pool.query('SELECT id FROM posts WHERE id = $1', [postId]);
 
       if (postCheck.rows.length === 0) {
-        throw new Error('Post not found');
+        console.error(`Post with ID ${postId} not found`);
+        return null;
       }
 
       // Check if user exists
+      console.log('Checking if user exists...');
       const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [authorId]);
 
       if (userCheck.rows.length === 0) {
-        throw new Error('User not found');
+        console.error(`User with ID ${authorId} not found`);
+        return null;
       }
 
       // Add comment
+      console.log('Inserting comment into database...');
       const result = await pool.query(`
         INSERT INTO comments (post_id, author_id, content)
         VALUES ($1, $2, $3)
@@ -115,8 +122,10 @@ const commentService = {
       `, [postId, authorId, content]);
 
       const comment = result.rows[0];
+      console.log('Comment inserted:', comment);
 
       // Get author information
+      console.log('Getting author information...');
       const authorResult = await pool.query(`
         SELECT id, username, full_name, avatar_url
         FROM users
@@ -124,6 +133,7 @@ const commentService = {
       `, [authorId]);
 
       const author = authorResult.rows[0];
+      console.log('Author information retrieved:', author);
 
       return {
         ...comment,
@@ -131,7 +141,7 @@ const commentService = {
       };
     } catch (error) {
       console.error('Error adding comment:', error);
-      throw error;
+      return null; // Return null instead of throwing the error
     }
   },
 
