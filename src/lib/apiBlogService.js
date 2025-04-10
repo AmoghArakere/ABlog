@@ -7,7 +7,7 @@ const apiBlogService = {
       const params = new URLSearchParams();
       params.append('page', page);
       params.append('limit', limit);
-      
+
       if (category) params.append('category', category);
       if (tag) params.append('tag', tag);
       if (search) params.append('search', search);
@@ -33,27 +33,33 @@ const apiBlogService = {
         return null;
       }
 
+      console.log(`API: Fetching post with slug '${slug}'`);
+
       // Fetch post from API
       const response = await fetch(`/api/posts/${slug}`);
-      
+      console.log(`API: Response status: ${response.status}`);
+
       if (!response.ok) {
         if (response.status === 404) {
-          console.error('getPostBySlug: Post not found with slug:', slug);
+          console.error(`API: Post with slug '${slug}' not found (404)`);
           return null;
         }
+        console.error(`API: Error response: ${response.status}`);
         throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
-      
+      console.log(`API: Response data:`, data);
+
       if (!data.success) {
-        console.error('getPostBySlug: API error:', data.error);
+        console.error('API: getPostBySlug error:', data.error);
         return null;
       }
 
+      console.log(`API: Successfully fetched post with slug '${slug}'`);
       return data.post;
     } catch (error) {
-      console.error('Error fetching post by slug:', error);
+      console.error('API: Error fetching post by slug:', error);
       return null;
     }
   },
@@ -90,7 +96,7 @@ const apiBlogService = {
       }
 
       const data = await response.json();
-      
+
       if (!data.success) {
         console.error('createPost: API error:', data.error);
         return null;
@@ -131,14 +137,14 @@ const apiBlogService = {
 
       if (!response.ok) {
         const errorData = await response.json();
-        return { 
-          success: false, 
-          error: errorData.error || `API error: ${response.status}` 
+        return {
+          success: false,
+          error: errorData.error || `API error: ${response.status}`
         };
       }
 
       const data = await response.json();
-      
+
       return {
         success: data.success,
         post: data.post,
@@ -167,14 +173,14 @@ const apiBlogService = {
 
       if (!response.ok) {
         const errorData = await response.json();
-        return { 
-          success: false, 
-          error: errorData.error || `API error: ${response.status}` 
+        return {
+          success: false,
+          error: errorData.error || `API error: ${response.status}`
         };
       }
 
       const data = await response.json();
-      
+
       return {
         success: data.success,
         error: data.error
@@ -190,13 +196,13 @@ const apiBlogService = {
     try {
       // Fetch categories from API
       const response = await fetch('/api/categories');
-      
+
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
-      
+
       if (!data.success) {
         console.error('getCategories: API error:', data.error);
         return [];
@@ -214,13 +220,13 @@ const apiBlogService = {
     try {
       // Fetch tags from API
       const response = await fetch('/api/tags');
-      
+
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
-      
+
       if (!data.success) {
         console.error('getTags: API error:', data.error);
         return [];

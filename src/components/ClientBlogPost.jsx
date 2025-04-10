@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { blogService, likeService, bookmarkService, commentService } from '../lib/localStorageService';
+import apiBlogService from '../lib/apiBlogService';
 import authService from '../lib/authService';
 import ClientCommentSection from './ClientCommentSection';
 import PostActions from './PostActions';
@@ -124,40 +125,87 @@ export default function ClientBlogPost({ slug }) {
     const fetchPost = async () => {
       try {
         setLoading(true);
+        console.log(`Fetching post with slug: ${slug}`);
 
-        // Fetch post by slug
-        const postData = await blogService.getPostBySlug(slug);
+        // Try to fetch from API first
+        try {
+          console.log('Attempting to fetch post from API...');
+          const postData = await apiBlogService.getPostBySlug(slug);
 
-        if (!postData) {
-          setError('Post not found');
-          setLoading(false);
-          return;
+          if (postData) {
+            console.log('Post found in API:', postData);
+            setPost(postData);
+          } else {
+            console.log('Post not found in API, falling back to localStorage');
+            // Fallback to localStorage
+            const localPostData = await blogService.getPostBySlug(slug);
+
+            if (!localPostData) {
+              console.error('Post not found in localStorage either');
+              setError('Post not found');
+              setLoading(false);
+              return;
+            }
+
+            console.log('Post found in localStorage:', localPostData);
+            setPost(localPostData);
+          }
+        } catch (apiError) {
+          console.error('Error fetching post from API:', apiError);
+
+          // Fallback to localStorage
+          console.log('Falling back to localStorage due to API error');
+          const localPostData = await blogService.getPostBySlug(slug);
+
+          if (!localPostData) {
+            console.error('Post not found in localStorage either');
+            setError('Post not found');
+            setLoading(false);
+            return;
+          }
+
+          console.log('Post found in localStorage:', localPostData);
+          setPost(localPostData);
         }
 
-        setPost(postData);
+        // At this point, post is set in state
+        // Use the post from state to fetch likes and bookmarks
+        const currentPost = post || {};
 
-        // Fetch like count
-        const likes = await likeService.getLikeCount(postData.id);
-        setLikeCount(likes);
+        // Fetch like count if we have a post
+        if (currentPost.id) {
+          console.log(`Fetching like count for post ID: ${currentPost.id}`);
+          const likes = await likeService.getLikeCount(currentPost.id);
+          setLikeCount(likes);
 
-        // Check if user has liked or bookmarked the post
-        if (currentUser) {
-          const hasLiked = await likeService.hasLiked(postData.id, currentUser.id);
-          setLiked(hasLiked);
+          // Check if user has liked or bookmarked the post
+          if (currentUser) {
+            const hasLiked = await likeService.hasLiked(currentPost.id, currentUser.id);
+            setLiked(hasLiked);
 
-          const hasBookmarked = await bookmarkService.hasBookmarked(postData.id, currentUser.id);
-          setBookmarked(hasBookmarked);
+            const hasBookmarked = await bookmarkService.hasBookmarked(currentPost.id, currentUser.id);
+            setBookmarked(hasBookmarked);
+          }
+        } else {
+          console.log('No post ID available yet, skipping like/bookmark fetch');
         }
 
         // Fetch related posts (posts with same category or by same author)
-        if (postData.categories && postData.categories.length > 0) {
-          const { posts: related } = await blogService.getPosts({
-            category: postData.categories[0].slug,
-            limit: 3
-          });
+        if (currentPost.categories && currentPost.categories.length > 0) {
+          console.log(`Fetching posts with category: ${currentPost.categories[0].slug}`);
+          try {
+            const { posts: related } = await blogService.getPosts({
+              category: currentPost.categories[0].slug,
+              limit: 3
+            });
 
-          // Filter out the current post
-          setRelatedPosts(related.filter(p => p.id !== postData.id));
+            // Filter out the current post
+            const filteredPosts = related.filter(p => p.id !== currentPost.id);
+            console.log(`Found ${filteredPosts.length} related posts by category`);
+            setRelatedPosts(filteredPosts);
+          } catch (error) {
+            console.error('Error fetching related posts by category:', error);
+          }
         }
 
         setLoading(false);

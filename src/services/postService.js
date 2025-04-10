@@ -156,8 +156,10 @@ const postService = {
   // Get a post by slug
   async getPostBySlug(slug) {
     try {
+      console.log(`DB: Fetching post with slug: ${slug}`);
+
       // Get the post
-      const result = await pool.query(`
+      const query = `
         SELECT
           p.id, p.title, p.slug, p.content, p.excerpt, p.cover_image,
           p.author_id, p.status, p.scheduled_publish_date, p.created_at, p.updated_at,
@@ -165,13 +167,25 @@ const postService = {
         FROM posts p
         JOIN users u ON p.author_id = u.id
         WHERE p.slug = $1
-      `, [slug]);
+      `;
+
+      console.log(`DB: Executing query: ${query}`);
+      console.log(`DB: Query params: [${slug}]`);
+
+      const result = await pool.query(query, [slug]);
+      console.log(`DB: Query returned ${result.rows.length} rows`);
 
       if (result.rows.length === 0) {
+        console.log(`DB: No post found with slug: ${slug}`);
         return null;
       }
 
       const post = result.rows[0];
+      console.log(`DB: Found post with ID: ${post.id}, Title: ${post.title}`);
+      console.log(`DB: Post status: ${post.status}`);
+      console.log(`DB: Post author: ${post.author_id} (${post.username})`);
+      console.log(`DB: Post created at: ${post.created_at}`);
+      console.log(`DB: Post updated at: ${post.updated_at}`);
 
       // Get categories for this post
       const categoriesResult = await pool.query(`
@@ -189,7 +203,7 @@ const postService = {
         WHERE pt.post_id = $1
       `, [post.id]);
 
-      return {
+      const formattedPost = {
         ...post,
         author: {
           id: post.author_id,
@@ -202,9 +216,12 @@ const postService = {
         categories: categoriesResult.rows,
         tags: tagsResult.rows
       };
+
+      console.log(`DB: Returning formatted post with ${categoriesResult.rows.length} categories and ${tagsResult.rows.length} tags`);
+      return formattedPost;
     } catch (error) {
       console.error('Error getting post by slug:', error);
-      throw error;
+      return null; // Return null instead of throwing to prevent crashes
     }
   },
 

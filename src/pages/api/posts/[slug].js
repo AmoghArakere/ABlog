@@ -5,54 +5,61 @@ import authService from '../../../services/authService';
 export async function get({ params }) {
   try {
     const { slug } = params;
-    
+    console.log(`API endpoint: Received request for post with slug: ${slug}`);
+
     if (!slug) {
+      console.log('API endpoint: No slug provided');
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Slug is required' 
+        JSON.stringify({
+          success: false,
+          error: 'Slug is required'
         }),
-        { 
+        {
           status: 400,
           headers: { 'Content-Type': 'application/json' }
         }
       );
     }
 
+    console.log(`API endpoint: Fetching post with slug: ${slug} from database`);
     const post = await postService.getPostBySlug(slug);
-    
+
     if (!post) {
+      console.log(`API endpoint: Post with slug: ${slug} not found in database`);
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Post not found' 
+        JSON.stringify({
+          success: false,
+          error: 'Post not found'
         }),
-        { 
+        {
           status: 404,
           headers: { 'Content-Type': 'application/json' }
         }
       );
     }
 
+    console.log(`API endpoint: Successfully found post with slug: ${slug}`);
+    console.log(`API endpoint: Post ID: ${post.id}, Title: ${post.title}`);
+
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         post
       }),
-      { 
+      {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       }
     );
   } catch (error) {
     console.error('Error in get post API:', error);
-    
+
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: 'An unexpected error occurred' 
+      JSON.stringify({
+        success: false,
+        error: 'An unexpected error occurred'
       }),
-      { 
+      {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       }
@@ -64,14 +71,14 @@ export async function get({ params }) {
 export async function put({ request, params }) {
   try {
     const { slug } = params;
-    
+
     if (!slug) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Slug is required' 
+        JSON.stringify({
+          success: false,
+          error: 'Slug is required'
         }),
-        { 
+        {
           status: 400,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -80,14 +87,14 @@ export async function put({ request, params }) {
 
     // Get the authorization header
     const authHeader = request.headers.get('Authorization');
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Unauthorized' 
+        JSON.stringify({
+          success: false,
+          error: 'Unauthorized'
         }),
-        { 
+        {
           status: 401,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -96,17 +103,17 @@ export async function put({ request, params }) {
 
     // Extract the token
     const token = authHeader.split(' ')[1];
-    
+
     // Verify the token and get the user
     const user = await authService.verifyToken(token);
-    
+
     if (!user) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Invalid or expired token' 
+        JSON.stringify({
+          success: false,
+          error: 'Invalid or expired token'
         }),
-        { 
+        {
           status: 401,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -115,14 +122,14 @@ export async function put({ request, params }) {
 
     // Get the post
     const post = await postService.getPostBySlug(slug);
-    
+
     if (!post) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Post not found' 
+        JSON.stringify({
+          success: false,
+          error: 'Post not found'
         }),
-        { 
+        {
           status: 404,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -132,11 +139,11 @@ export async function put({ request, params }) {
     // Check if user is the author
     if (post.author_id !== user.id) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'You are not authorized to update this post' 
+        JSON.stringify({
+          success: false,
+          error: 'You are not authorized to update this post'
         }),
-        { 
+        {
           status: 403,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -145,15 +152,15 @@ export async function put({ request, params }) {
 
     // Parse request body
     const data = await request.json();
-    const { 
-      title, 
-      content, 
-      excerpt, 
-      cover_image, 
-      categoryIds, 
-      tagIds, 
-      status, 
-      scheduled_publish_date 
+    const {
+      title,
+      content,
+      excerpt,
+      cover_image,
+      categoryIds,
+      tagIds,
+      status,
+      scheduled_publish_date
     } = data;
 
     // Update post
@@ -170,11 +177,11 @@ export async function put({ request, params }) {
 
     if (!result.success) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: result.error || 'Failed to update post' 
+        JSON.stringify({
+          success: false,
+          error: result.error || 'Failed to update post'
         }),
-        { 
+        {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -182,24 +189,24 @@ export async function put({ request, params }) {
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         post: result.post
       }),
-      { 
+      {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       }
     );
   } catch (error) {
     console.error('Error in update post API:', error);
-    
+
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: 'An unexpected error occurred' 
+      JSON.stringify({
+        success: false,
+        error: 'An unexpected error occurred'
       }),
-      { 
+      {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       }
@@ -211,14 +218,14 @@ export async function put({ request, params }) {
 export async function del({ request, params }) {
   try {
     const { slug } = params;
-    
+
     if (!slug) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Slug is required' 
+        JSON.stringify({
+          success: false,
+          error: 'Slug is required'
         }),
-        { 
+        {
           status: 400,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -227,14 +234,14 @@ export async function del({ request, params }) {
 
     // Get the authorization header
     const authHeader = request.headers.get('Authorization');
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Unauthorized' 
+        JSON.stringify({
+          success: false,
+          error: 'Unauthorized'
         }),
-        { 
+        {
           status: 401,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -243,17 +250,17 @@ export async function del({ request, params }) {
 
     // Extract the token
     const token = authHeader.split(' ')[1];
-    
+
     // Verify the token and get the user
     const user = await authService.verifyToken(token);
-    
+
     if (!user) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Invalid or expired token' 
+        JSON.stringify({
+          success: false,
+          error: 'Invalid or expired token'
         }),
-        { 
+        {
           status: 401,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -262,14 +269,14 @@ export async function del({ request, params }) {
 
     // Get the post
     const post = await postService.getPostBySlug(slug);
-    
+
     if (!post) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Post not found' 
+        JSON.stringify({
+          success: false,
+          error: 'Post not found'
         }),
-        { 
+        {
           status: 404,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -279,11 +286,11 @@ export async function del({ request, params }) {
     // Check if user is the author
     if (post.author_id !== user.id) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'You are not authorized to delete this post' 
+        JSON.stringify({
+          success: false,
+          error: 'You are not authorized to delete this post'
         }),
-        { 
+        {
           status: 403,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -295,11 +302,11 @@ export async function del({ request, params }) {
 
     if (!result.success) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Failed to delete post' 
+        JSON.stringify({
+          success: false,
+          error: 'Failed to delete post'
         }),
-        { 
+        {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -307,23 +314,23 @@ export async function del({ request, params }) {
     }
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true
       }),
-      { 
+      {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       }
     );
   } catch (error) {
     console.error('Error in delete post API:', error);
-    
+
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: 'An unexpected error occurred' 
+      JSON.stringify({
+        success: false,
+        error: 'An unexpected error occurred'
       }),
-      { 
+      {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       }
