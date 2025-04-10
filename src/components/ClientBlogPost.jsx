@@ -3,6 +3,7 @@ import { blogService, likeService, bookmarkService, commentService } from '../li
 import apiBlogService from '../lib/apiBlogService';
 import authService from '../lib/authService';
 import ClientCommentSection from './ClientCommentSection';
+import GiscusComments from './GiscusComments';
 import PostActions from './PostActions';
 
 // Function to process content and fix image display and spacing issues
@@ -670,7 +671,21 @@ export default function ClientBlogPost({ slug }) {
 
       <div className="border-t border-gray-200 pt-8">
         <h3 className="text-2xl font-semibold mb-6">Comments</h3>
-        <ClientCommentSection postId={post.id} />
+        {/* Giscus Comments */}
+        <GiscusComments
+          repo="AmoghArakere/ABlog"
+          repoId="R_kgDOLXXXXX"
+          category="Announcements"
+          categoryId="DIC_kwDOLXXXXXXXXX"
+          mapping="pathname"
+          theme="dark"
+        />
+
+        {/* Fallback comment system */}
+        <div className="mt-8">
+          <h4 className="text-xl font-semibold mb-4">Alternative Comments</h4>
+          <ClientCommentSection postId={post.id} />
+        </div>
       </div>
     </article>
   );
