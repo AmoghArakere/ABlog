@@ -1,7 +1,16 @@
 // Catch-all API handler
 import authService from '../../services/authService';
+import initDatabase from '../../db/init';
 
 export async function post({ request, params }) {
+  // Initialize database if tables don't exist
+  try {
+    await initDatabase();
+  } catch (error) {
+    console.error('Error initializing database:', error);
+    // Continue with the request even if initialization fails
+  }
+
   const path = params.path;
   const url = new URL(request.url);
   const pathSegments = path.split('/');
