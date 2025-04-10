@@ -126,7 +126,7 @@ export const getImageUrl = (imageUrl, fallbackUrl = '/images/placeholder-profile
     return fallbackUrl;
   }
 
-  // If it's already a URL or a data URL, return as is
+  // If it's already a URL or a data URL, process it
   if (imageUrl.startsWith('http') || imageUrl.startsWith('data:image/')) {
     // For data URLs, check if they're valid
     if (imageUrl.startsWith('data:image/')) {
@@ -135,7 +135,23 @@ export const getImageUrl = (imageUrl, fallbackUrl = '/images/placeholder-profile
         console.warn(`getImageUrl: Data URL seems invalid (too short: ${imageUrl.length} chars), using fallback`);
         return fallbackUrl;
       }
+      return imageUrl; // Return data URLs as is
     }
+
+    // For HTTP URLs (like Cloudinary), add a timestamp to prevent caching
+    if (imageUrl.startsWith('http')) {
+      // Check if the URL already has a timestamp parameter
+      if (imageUrl.includes('?t=')) {
+        return imageUrl; // Already has a timestamp
+      }
+
+      // Add timestamp parameter
+      const separator = imageUrl.includes('?') ? '&' : '?';
+      const timestampedUrl = `${imageUrl}${separator}t=${Date.now()}`;
+      console.log(`Added timestamp to prevent caching: ${timestampedUrl}`);
+      return timestampedUrl;
+    }
+
     return imageUrl;
   }
 

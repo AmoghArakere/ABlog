@@ -103,10 +103,15 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
             if (!error && result && result.event === "success") {
               const imageUrl = result.info.secure_url;
               console.log(`${type} upload successful:`, imageUrl);
-              setPreview(imageUrl);
+
+              // Add a timestamp parameter to prevent caching
+              const timestampedUrl = `${imageUrl}?t=${Date.now()}`;
+              console.log(`Using timestamped URL to prevent caching:`, timestampedUrl);
+
+              setPreview(timestampedUrl);
               setError('');
               if (onImageSelect) {
-                onImageSelect(imageUrl);
+                onImageSelect(timestampedUrl);
               }
               setIsUploading(false);
               // Clear the active uploader data attribute

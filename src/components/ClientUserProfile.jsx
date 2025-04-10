@@ -190,8 +190,22 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     const username = profile.username; // Use the existing username
     const full_name = formData.get('fullName');
     const bio = formData.get('bio');
-    const avatar_url = formData.get('avatar_url');
-    const cover_image = formData.get('cover_image');
+
+    // Get image URLs from hidden inputs
+    const avatarInput = document.getElementById('avatar_url');
+    const coverInput = document.getElementById('cover_image');
+
+    const avatar_url = avatarInput ? avatarInput.value : formData.get('avatar_url');
+    const cover_image = coverInput ? coverInput.value : formData.get('cover_image');
+
+    console.log('Form values:', {
+      username,
+      full_name,
+      bio,
+      avatar_url: avatar_url ? `${avatar_url.substring(0, 30)}...` : null,
+      cover_image: cover_image ? `${cover_image.substring(0, 30)}...` : null
+    });
+
     const website = formData.get('website');
     const location = formData.get('location');
 
@@ -509,15 +523,23 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                             console.log('Profile picture selected:', imageUrl);
                             // Set the image URL directly - no need for adjustment with Cloudinary
                             const hiddenInput = document.getElementById('avatar_url');
-                            if (hiddenInput) hiddenInput.value = imageUrl;
+                            if (hiddenInput) {
+                              hiddenInput.value = imageUrl;
+                              console.log('Set avatar_url input value to:', imageUrl);
+                            }
 
                             // Update ONLY profile picture previews
                             const previewImg = document.querySelector('.preview-profile-pic');
                             if (previewImg) {
                               previewImg.src = imageUrl;
+                              console.log('Updated preview-profile-pic src to:', imageUrl);
+
                               // Also update the profile picture in the header if it exists
                               const headerProfilePic = document.querySelector('.header-profile-pic');
-                              if (headerProfilePic) headerProfilePic.src = imageUrl;
+                              if (headerProfilePic) {
+                                headerProfilePic.src = imageUrl;
+                                console.log('Updated header-profile-pic src to:', imageUrl);
+                              }
                             }
                           }
                         }}
@@ -557,15 +579,23 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                             console.log('Cover image selected:', imageUrl);
                             // Set the image URL directly - no need for adjustment with Cloudinary
                             const hiddenInput = document.getElementById('cover_image');
-                            if (hiddenInput) hiddenInput.value = imageUrl;
+                            if (hiddenInput) {
+                              hiddenInput.value = imageUrl;
+                              console.log('Set cover_image input value to:', imageUrl);
+                            }
 
                             // Update ONLY cover image previews
                             const previewImg = document.querySelector('.preview-cover-image');
                             if (previewImg) {
                               previewImg.src = imageUrl;
+                              console.log('Updated preview-cover-image src to:', imageUrl);
+
                               // Also update the cover image in the header if it exists
                               const headerCoverImg = document.querySelector('.header-cover-image');
-                              if (headerCoverImg) headerCoverImg.src = imageUrl;
+                              if (headerCoverImg) {
+                                headerCoverImg.src = imageUrl;
+                                console.log('Updated header-cover-image src to:', imageUrl);
+                              }
                             }
                           }
                         }}
