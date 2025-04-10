@@ -279,6 +279,8 @@ const authService = {
   // Sign up with email and password
   async signUp(email, password, userData = {}) {
     try {
+      console.log('SignUp called with:', { email, userData });
+
       // Check if email already exists
       const existingUser = await userService.getUserByEmail(email);
 
@@ -308,6 +310,8 @@ const authService = {
         location: userData.location || ''
       });
 
+      console.log('User created:', { id: user.id, email: user.email, username: user.username });
+
       // Generate JWT token
       const token = jwt.sign(
         {
@@ -318,6 +322,9 @@ const authService = {
         JWT_SECRET,
         { expiresIn: '7d' }
       );
+
+      // Log the user object being returned
+      console.log('Returning user object:', JSON.stringify(user));
 
       return {
         success: true,

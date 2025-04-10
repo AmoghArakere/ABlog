@@ -40,6 +40,20 @@ const authService = {
     }
   },
 
+  // Update the current user in localStorage
+  updateCurrentUser(user) {
+    if (!user) return false;
+
+    try {
+      console.log('Updating current user in localStorage:', user);
+      setToStorage('currentUser', JSON.stringify(user));
+      return true;
+    } catch (error) {
+      console.error('Error updating current user:', error);
+      return false;
+    }
+  },
+
   // Get the current token from localStorage
   getToken() {
     return getFromStorage('token');
@@ -66,6 +80,14 @@ const authService = {
         return { success: false, error: data.error || 'Failed to sign in' };
       }
 
+      // Ensure the user object has all required fields
+      if (!data.user.username) {
+        console.error('User object is missing username:', data.user);
+        return { success: false, error: 'Invalid user data received from server' };
+      }
+
+      console.log('Storing user in localStorage:', data.user);
+
       // Store the user and token in localStorage
       setToStorage('currentUser', JSON.stringify(data.user));
       setToStorage('token', data.token);
@@ -80,6 +102,8 @@ const authService = {
   // Sign up with email and password
   async signUp(email, password, userData = {}) {
     try {
+      console.log('Client signUp called with:', { email, userData });
+
       // Call the register API endpoint
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -100,10 +124,18 @@ const authService = {
       });
 
       const data = await response.json();
+      console.log('Sign up response:', data);
 
       if (!data.success) {
         return { success: false, error: data.error || 'Failed to sign up' };
       }
+
+      // Make sure the user object has a username
+      if (!data.user.username && userData.username) {
+        data.user.username = userData.username;
+      }
+
+      console.log('Storing user in localStorage:', data.user);
 
       // Store the user and token in localStorage
       setToStorage('currentUser', JSON.stringify(data.user));

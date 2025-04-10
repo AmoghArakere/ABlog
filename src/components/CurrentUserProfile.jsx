@@ -26,9 +26,17 @@ export default function CurrentUserProfile() {
 
         if (!user.username) {
           console.error('User has no username:', user);
-          setError('Your profile is missing a username. Please contact support.');
-          setLoading(false);
-          return;
+          // Generate a username from email if available
+          if (user.email) {
+            user.username = user.email.split('@')[0];
+            console.log('Generated username from email:', user.username);
+            // Update the user in localStorage
+            authService.updateCurrentUser(user);
+          } else {
+            setError('Your profile is missing a username. Please contact support.');
+            setLoading(false);
+            return;
+          }
         }
 
         console.log('Setting current user with username:', user.username);

@@ -44,6 +44,13 @@ export async function post({ request }) {
       );
     }
 
+    // Ensure the user object has a username
+    if (result.user && !result.user.username && username) {
+      result.user.username = username;
+    }
+
+    console.log('Register API returning user:', result.user);
+
     return new Response(
       JSON.stringify({
         success: true,

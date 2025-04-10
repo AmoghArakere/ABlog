@@ -41,6 +41,16 @@ export async function post({ request }) {
       );
     }
 
+    // Log the user object being returned
+    console.log('Login API returning user:', result.user);
+
+    // Ensure the user object has a username
+    if (result.user && !result.user.username && result.user.email) {
+      // Generate a username from email if missing
+      result.user.username = result.user.email.split('@')[0];
+      console.log('Generated username from email:', result.user.username);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
