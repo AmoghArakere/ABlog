@@ -122,6 +122,33 @@ async function initDatabase() {
     console.log('Initializing database...');
     await pool.query(schema);
     console.log('Database initialized successfully!');
+
+    // Check if test user exists
+    const userResult = await pool.query('SELECT * FROM users WHERE email = $1', ['test@example.com']);
+
+    if (userResult.rows.length === 0) {
+      console.log('Creating test user...');
+      // Create a test user
+      const hashedPassword = await bcrypt.hash('test123', 10);
+      await pool.query(
+        `INSERT INTO users (email, password, username, full_name, avatar_url, bio, website, location)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (email) DO NOTHING`,
+        [
+          'test@example.com',
+          hashedPassword,
+          'testuser',
+          'Test User',
+          '/images/placeholder-profile.svg',
+          'This is a test user account',
+          'https://example.com',
+          'Test Location'
+        ]
+      );
+      console.log('Test user created successfully!');
+    } else {
+      console.log('Test user already exists');
+    }
   } catch (error) {
     console.error('Error initializing database:', error);
   }
