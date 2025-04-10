@@ -39,8 +39,6 @@ export default function ClientRegisterForm() {
 
     try {
       const { success, error } = await authService.signUp(email, password, {
-        firstName,
-        lastName,
         username,
         full_name: `${firstName} ${lastName}`
       });
