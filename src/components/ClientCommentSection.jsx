@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import apiCommentService from '../lib/apiCommentService';
+import { commentService } from '../lib/localStorageService';
 import authService from '../lib/authService';
 
 export default function ClientCommentSection({ postId }) {
@@ -13,158 +13,75 @@ export default function ClientCommentSection({ postId }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    console.log('[CommentSection] Component mounted or updated with postId:', postId);
-    // Flag to track if component is mounted
-    let isMounted = true;
-
     // Get the current user from localStorage
     const currentUser = authService.getCurrentUser();
-    if (isMounted) {
-      console.log('[CommentSection] Setting user:', currentUser ? currentUser.username : 'none');
-      setUser(currentUser);
-    }
+    setUser(currentUser);
 
     const fetchComments = async () => {
       try {
-        if (isMounted) setLoading(true);
-        console.log(`[CommentSection] Fetching comments for post ID: ${postId}`);
+        setLoading(true);
 
-        // Try to get comments from localStorage first as a fallback
-        let fetchedComments = [];
-        let pages = 1;
+        // Get comments from localStorage
+        const result = await commentService.getComments(postId, { page });
+        const fetchedComments = result.comments || [];
+        const pages = result.totalPages || 1;
 
-        try {
-          console.log('[CommentSection] Attempting to fetch comments from API...');
-          const result = await apiCommentService.getComments(postId, { page });
-          fetchedComments = result.comments || [];
-          pages = result.totalPages || 1;
-          console.log(`[CommentSection] Fetched ${fetchedComments.length} comments from API`);
-        } catch (apiError) {
-          console.error('[CommentSection] API error, falling back to localStorage:', apiError);
-          // Fallback to localStorage
-          const { commentService } = await import('../lib/localStorageService');
-          const result = await commentService.getComments(postId, { page });
-          fetchedComments = result.comments || [];
-          pages = result.totalPages || 1;
-          console.log(`[CommentSection] Fetched ${fetchedComments.length} comments from localStorage`);
-        }
-
-        if (isMounted) {
-          console.log('[CommentSection] Setting comments state');
-          setComments(fetchedComments);
-          setTotalPages(pages);
-          setLoading(false);
-        }
+        setComments(fetchedComments);
+        setTotalPages(pages);
+        setLoading(false);
       } catch (err) {
-        console.error('[CommentSection] Error fetching comments:', err);
-        if (isMounted) {
-          setError('Failed to load comments');
-          setLoading(false);
-        }
+        console.error('Error fetching comments:', err);
+        setError('Failed to load comments');
+        setLoading(false);
       }
     };
 
     if (postId) {
       fetchComments();
-    } else {
-      console.log('[CommentSection] No postId provided, skipping comment fetch');
     }
-
-    // Cleanup function
-    return () => {
-      console.log('[CommentSection] Component unmounting');
-      isMounted = false;
-    };
   }, [postId, page]);
 
   const handleSubmitComment = async (e) => {
     e.preventDefault();
-    console.log('[CommentSection] Comment submission initiated');
 
     if (!user) {
-      console.log('[CommentSection] No user logged in, redirecting to login');
       // Redirect to login
       window.location.href = '/login';
       return;
     }
 
     if (!commentText.trim()) {
-      console.log('[CommentSection] Empty comment, ignoring submission');
       return;
     }
 
     try {
       setSubmitting(true);
-      console.log(`[CommentSection] Submitting comment for post ${postId} by user ${user.id}`);
 
-      const token = authService.getToken();
-      console.log('[CommentSection] Auth token available:', !!token);
-
-      // Try API first, then fallback to localStorage
-      let newComment = null;
-
-      try {
-        console.log('[CommentSection] Attempting to add comment via API');
-        newComment = await apiCommentService.addComment(postId, user.id, commentText, token);
-        console.log('[CommentSection] API comment result:', newComment);
-      } catch (apiError) {
-        console.error('[CommentSection] API error, falling back to localStorage:', apiError);
-        // Fallback to localStorage
-        const { commentService } = await import('../lib/localStorageService');
-        newComment = await commentService.addComment(postId, user.id, commentText);
-        console.log('[CommentSection] localStorage comment result:', newComment);
-      }
+      // Add comment using localStorage service
+      const newComment = await commentService.addComment(postId, user.id, commentText);
 
       if (newComment) {
-        console.log('[CommentSection] Comment added successfully, updating UI');
         setComments([newComment, ...comments]);
         setCommentText('');
-      } else {
-        console.error('[CommentSection] Failed to add comment, no comment returned');
-        alert('Failed to add comment. Please try again.');
       }
 
       setSubmitting(false);
     } catch (err) {
-      console.error('[CommentSection] Error adding comment:', err);
+      console.error('Error adding comment:', err);
       setSubmitting(false);
-      alert('An error occurred while adding your comment. Please try again.');
     }
   };
 
   const handleDeleteComment = async (commentId) => {
-    console.log(`[CommentSection] Attempting to delete comment: ${commentId}`);
     try {
-      const token = authService.getToken();
-      console.log('[CommentSection] Auth token available for delete:', !!token);
-
-      // Try API first, then fallback to localStorage
-      let success = false;
-
-      try {
-        console.log('[CommentSection] Attempting to delete comment via API');
-        const result = await apiCommentService.deleteComment(commentId, token);
-        success = result.success;
-        console.log('[CommentSection] API delete result:', success);
-      } catch (apiError) {
-        console.error('[CommentSection] API error on delete, falling back to localStorage:', apiError);
-        // Fallback to localStorage
-        const { commentService } = await import('../lib/localStorageService');
-        const result = await commentService.deleteComment(commentId);
-        success = result.success;
-        console.log('[CommentSection] localStorage delete result:', success);
-      }
+      // Delete comment using localStorage service
+      const success = await commentService.deleteComment(commentId);
 
       if (success) {
-        console.log('[CommentSection] Comment deleted successfully, updating UI');
         setComments(comments.filter(comment => comment.id !== commentId));
-      } else {
-        console.error('[CommentSection] Failed to delete comment');
-        alert('Failed to delete comment. Please try again.');
       }
     } catch (err) {
-      console.error('[CommentSection] Error deleting comment:', err);
-      alert('An error occurred while deleting the comment. Please try again.');
+      console.error('Error deleting comment:', err);
     }
   };
 
