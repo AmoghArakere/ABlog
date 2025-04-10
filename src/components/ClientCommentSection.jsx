@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { commentService } from '../lib/localStorageService';
+import apiCommentService from '../lib/apiCommentService';
 import authService from '../lib/authService';
 
 export default function ClientCommentSection({ postId }) {
@@ -21,7 +21,7 @@ export default function ClientCommentSection({ postId }) {
       try {
         setLoading(true);
 
-        const { comments: fetchedComments, totalPages: pages } = await commentService.getComments(postId, { page });
+        const { comments: fetchedComments, totalPages: pages } = await apiCommentService.getComments(postId, { page });
 
         setComments(fetchedComments);
         setTotalPages(pages);
@@ -54,7 +54,8 @@ export default function ClientCommentSection({ postId }) {
     try {
       setSubmitting(true);
 
-      const newComment = await commentService.addComment(postId, user.id, commentText);
+      const token = authService.getToken();
+      const newComment = await apiCommentService.addComment(postId, user.id, commentText, token);
 
       if (newComment) {
         setComments([newComment, ...comments]);
@@ -70,7 +71,8 @@ export default function ClientCommentSection({ postId }) {
 
   const handleDeleteComment = async (commentId) => {
     try {
-      const success = await commentService.deleteComment(commentId);
+      const token = authService.getToken();
+      const success = await apiCommentService.deleteComment(commentId, token);
 
       if (success) {
         setComments(comments.filter(comment => comment.id !== commentId));

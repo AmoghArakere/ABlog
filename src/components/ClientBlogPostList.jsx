@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { blogService } from '../lib/localStorageService';
+import apiBlogService from '../lib/apiBlogService';
 import ClientBlogPostCard from './ClientBlogPostCard';
 
 export default function ClientBlogPostList({
@@ -22,8 +23,17 @@ export default function ClientBlogPostList({
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const categoriesData = await blogService.getCategories();
-        setCategories(categoriesData);
+        // Try to fetch from API first
+        try {
+          const categoriesData = await apiBlogService.getCategories();
+          setCategories(categoriesData);
+        } catch (apiError) {
+          console.error('Error fetching categories from API, falling back to localStorage:', apiError);
+
+          // Fallback to localStorage
+          const categoriesData = await blogService.getCategories();
+          setCategories(categoriesData);
+        }
       } catch (err) {
         console.error('Error fetching categories:', err);
       }
@@ -45,22 +55,45 @@ export default function ClientBlogPostList({
           search: searchResults ? searchTerm : null
         });
 
-        const result = await blogService.getPosts({
-          page,
-          limit: postsPerPage,
-          category: selectedCategory,
-          tag,
-          authorId,
-          search: searchResults ? searchTerm : null
-        });
+        // Try to fetch from API first
+        try {
+          const result = await apiBlogService.getPosts({
+            page,
+            limit: postsPerPage,
+            category: selectedCategory,
+            tag,
+            authorId,
+            search: searchResults ? searchTerm : null
+          });
 
-        console.log('Posts result:', result);
-        const { posts: fetchedPosts, totalPages: pages } = result;
+          console.log('Posts result from API:', result);
+          const { posts: fetchedPosts, totalPages: pages } = result;
 
-        console.log('Fetched posts:', fetchedPosts);
-        setPosts(fetchedPosts);
-        setTotalPages(pages);
-        setLoading(false);
+          console.log('Fetched posts from API:', fetchedPosts);
+          setPosts(fetchedPosts);
+          setTotalPages(pages);
+          setLoading(false);
+        } catch (apiError) {
+          console.error('Error fetching posts from API, falling back to localStorage:', apiError);
+
+          // Fallback to localStorage
+          const result = await blogService.getPosts({
+            page,
+            limit: postsPerPage,
+            category: selectedCategory,
+            tag,
+            authorId,
+            search: searchResults ? searchTerm : null
+          });
+
+          console.log('Posts result from localStorage:', result);
+          const { posts: fetchedPosts, totalPages: pages } = result;
+
+          console.log('Fetched posts from localStorage:', fetchedPosts);
+          setPosts(fetchedPosts);
+          setTotalPages(pages);
+          setLoading(false);
+        }
       } catch (err) {
         console.error('Error fetching posts:', err);
         setError('Failed to load posts');
