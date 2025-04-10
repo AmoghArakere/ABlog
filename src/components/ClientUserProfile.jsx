@@ -52,31 +52,73 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
 
         if (!profileData) {
           console.error('No profile found for username:', username);
-          setError('User not found');
-          setLoading(false);
-          return;
+
+          // If this is the current user's profile but no profile data was found,
+          // use the current user data as the profile
+          if (isCurrentUser && currentUser) {
+            console.log('Using current user data as profile for current user');
+            setProfile(currentUser);
+          } else {
+            setError('User not found');
+            setLoading(false);
+            return;
+          }
+        } else {
+          setProfile(profileData);
         }
 
-        setProfile(profileData);
-
         // Fetch user's posts
-        const { posts: userPosts, total } = await blogService.getPosts({ authorId: profileData.id });
-        setPosts(userPosts);
+        try {
+          const userId = profile ? profile.id : (currentUser ? currentUser.id : null);
+          if (userId) {
+            const { posts: userPosts, total } = await blogService.getPosts({ authorId: userId });
+            setPosts(userPosts || []);
+          } else {
+            console.error('No user ID available to fetch posts');
+            setPosts([]);
+          }
+        } catch (err) {
+          console.error('Error fetching user posts:', err);
+          setPosts([]);
+        }
 
         // Update stats
-        const followersData = await profileService.getFollowers(profileData.id);
-        const followingData = await profileService.getFollowing(profileData.id);
+        try {
+          const userId = profile ? profile.id : (currentUser ? currentUser.id : null);
+          if (userId) {
+            const followersData = await profileService.getFollowers(userId);
+            const followingData = await profileService.getFollowing(userId);
 
-        setStats({
-          posts: total,
-          followers: followersData.total,
-          following: followingData.total
-        });
+            setStats({
+              posts: posts.length || 0,
+              followers: followersData ? followersData.total : 0,
+              following: followingData ? followingData.total : 0
+            });
+          } else {
+            setStats({
+              posts: 0,
+              followers: 0,
+              following: 0
+            });
+          }
+        } catch (err) {
+          console.error('Error fetching user stats:', err);
+          setStats({
+            posts: posts.length || 0,
+            followers: 0,
+            following: 0
+          });
+        }
 
         // Check if current user is following this profile
-        if (currentUser) {
-          const following = await profileService.isFollowing(currentUser.id, profileData.id);
-          setIsFollowing(following);
+        try {
+          if (currentUser && profile) {
+            const following = await profileService.isFollowing(currentUser.id, profile.id);
+            setIsFollowing(following);
+          }
+        } catch (err) {
+          console.error('Error checking if following:', err);
+          setIsFollowing(false);
         }
 
         setLoading(false);

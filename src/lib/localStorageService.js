@@ -596,19 +596,47 @@ export const profileService = {
       }
 
       console.log('Getting user by username:', username);
-      const users = JSON.parse(getFromStorage('users'));
-      console.log('Total users in storage:', users.length);
 
-      const user = users.find(user => user.username === username);
-      if (user) {
-        console.log('Found user:', user.id, user.username);
-      } else {
-        console.error('No user found with username:', username);
-        // Log all usernames to help debug
-        console.log('Available usernames:', users.map(u => u.username));
+      // First check if this is the current user
+      const currentUserJson = getFromStorage('currentUser');
+      if (currentUserJson) {
+        try {
+          const currentUser = JSON.parse(currentUserJson);
+          if (currentUser && currentUser.username === username) {
+            console.log('Username matches current user:', currentUser.username);
+            return currentUser;
+          }
+        } catch (e) {
+          console.error('Error parsing current user:', e);
+        }
       }
 
-      return user || null;
+      // If we get here, either the current user doesn't match or there was an error
+      // Try to get from the users array if it exists
+      const usersJson = getFromStorage('users');
+      if (!usersJson) {
+        console.error('No users found in localStorage');
+        return null;
+      }
+
+      try {
+        const users = JSON.parse(usersJson);
+        console.log('Total users in storage:', users.length);
+
+        const user = users.find(user => user.username === username);
+        if (user) {
+          console.log('Found user:', user.id, user.username);
+          return user;
+        } else {
+          console.error('No user found with username:', username);
+          // Log all usernames to help debug
+          console.log('Available usernames:', users.map(u => u.username));
+        }
+      } catch (e) {
+        console.error('Error parsing users array:', e);
+      }
+
+      return null;
     } catch (error) {
       console.error('Error fetching user by username:', error);
       return null;
