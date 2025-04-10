@@ -17,7 +17,13 @@
   path = "/*"
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
+  from = "/api/auth/login"
+  to = "/.netlify/functions/api"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/auth/register"
+  to = "/.netlify/functions/api"
   status = 200
   force = true

@@ -51,7 +51,7 @@ const authService = {
       console.log(`Attempting to sign in with email: ${email}`);
 
       // Call the login API endpoint
-      const response = await fetch('/.netlify/functions/api', {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -81,7 +81,7 @@ const authService = {
   async signUp(email, password, userData = {}) {
     try {
       // Call the register API endpoint
-      const response = await fetch('/.netlify/functions/api', {
+      const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

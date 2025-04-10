@@ -314,16 +314,32 @@ exports.handler = async function(event, context) {
 
   // Get the path from the event
   let path = '';
-  if (event.path.includes('/.netlify/functions/api/')) {
-    path = event.path.replace('/.netlify/functions/api/', '');
-  } else if (event.path.includes('/api/')) {
-    path = event.path.replace('/api/', '');
-  } else {
-    // Handle case where path doesn't include expected prefix
-    path = event.rawUrl ? new URL(event.rawUrl).pathname.replace('/api/', '') : '';
-  }
+  let segments = [];
 
-  const segments = path.split('/');
+  // Check if this is a login or register request based on the URL
+  if (event.rawUrl) {
+    const url = new URL(event.rawUrl);
+    path = url.pathname;
+    console.log(`Raw URL path: ${path}`);
+
+    if (path.includes('/api/auth/login')) {
+      segments = ['auth', 'login'];
+    } else if (path.includes('/api/auth/register')) {
+      segments = ['auth', 'register'];
+    } else if (path.includes('/.netlify/functions/api')) {
+      // Try to determine from the body
+      try {
+        const body = JSON.parse(event.body || '{}');
+        if (body.username) {
+          segments = ['auth', 'register'];
+        } else {
+          segments = ['auth', 'login'];
+        }
+      } catch (error) {
+        console.error('Error parsing body:', error);
+      }
+    }
+  }
 
   console.log(`API request to: ${path}`);
   console.log('HTTP method:', event.httpMethod);
