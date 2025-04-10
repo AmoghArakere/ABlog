@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AuthProvider } from '../contexts/AuthContext';
+import { ApiAuthProvider } from '../contexts/ApiAuthContext';
 import { ToastProvider } from '../contexts/ToastContext';
 import { initializeSampleData } from '../lib/sampleData';
 import authService from '../lib/authService';
@@ -18,10 +19,12 @@ export default function App({ children }) {
   }, [initialized]);
 
   return (
-    <AuthProvider>
-      <ToastProvider>
-        {children}
-      </ToastProvider>
-    </AuthProvider>
+    <ApiAuthProvider>
+      <AuthProvider>
+        <ToastProvider>
+          {children}
+        </ToastProvider>
+      </AuthProvider>
+    </ApiAuthProvider>
   );
 }

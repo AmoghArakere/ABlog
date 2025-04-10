@@ -2,7 +2,7 @@
 
 ![ABlog Logo](public/images/ablog-logo.svg)
 
-ABlog is a modern, feature-rich blogging platform built with Astro.js, offering a seamless writing and reading experience. With its clean, dark-themed UI and powerful features, ABlog provides everything you need to create, share, and discover engaging content.
+ABlog is a modern, feature-rich blogging platform built with Astro.js and PostgreSQL, offering a seamless writing and reading experience. With its clean, dark-themed UI and powerful features, ABlog provides everything you need to create, share, and discover engaging content.
 
 ## 🚀 Features
 
@@ -24,8 +24,10 @@ ABlog is a modern, feature-rich blogging platform built with Astro.js, offering 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Astro.js, React, Tailwind CSS
+- **Backend**: Node.js with Astro API endpoints
+- **Database**: PostgreSQL
 - **UI Components**: shadcn/ui (Magic UI)
-- **Authentication**: NextAuth.js
+- **Authentication**: JWT-based authentication
 - **Image Storage**: Cloudinary
 - **Comments**: Giscus
 
@@ -39,6 +41,16 @@ All commands are run from the root of the project, from a terminal:
 | `npm run dev`     | Starts local dev server at `localhost:4321`  |
 | `npm run build`   | Build your production site to `./dist/`      |
 | `npm run preview` | Preview your build locally, before deploying |
+| `npm run init-db` | Initialize the PostgreSQL database           |
+
+## 🔧 Setup
+
+1. Clone the repository
+2. Install dependencies with `npm install`
+3. Create a PostgreSQL database
+4. Update the `.env` file with your database credentials and other environment variables
+5. Initialize the database with `npm run init-db`
+6. Start the development server with `npm run dev`
 
 ## 👤 Author
 
