@@ -138,18 +138,26 @@ export const getImageUrl = (imageUrl, fallbackUrl = '/images/placeholder-profile
       return imageUrl; // Return data URLs as is
     }
 
-    // For HTTP URLs (like Cloudinary), add a timestamp to prevent caching
+    // For HTTP URLs (like Cloudinary), handle timestamp parameters
     if (imageUrl.startsWith('http')) {
       // Check if the URL already has a timestamp parameter
       if (imageUrl.includes('?t=')) {
+        // For display purposes, we want to keep the timestamp to prevent caching
+        // But for storage, we might want to remove it (handled elsewhere)
         return imageUrl; // Already has a timestamp
       }
 
-      // Add timestamp parameter
-      const separator = imageUrl.includes('?') ? '&' : '?';
-      const timestampedUrl = `${imageUrl}${separator}t=${Date.now()}`;
-      console.log(`Added timestamp to prevent caching: ${timestampedUrl}`);
-      return timestampedUrl;
+      // Check if this is a Cloudinary URL
+      if (imageUrl.includes('cloudinary.com')) {
+        // Add timestamp parameter to prevent caching for display
+        const separator = imageUrl.includes('?') ? '&' : '?';
+        const timestampedUrl = `${imageUrl}${separator}t=${Date.now()}`;
+        console.log(`Added timestamp to Cloudinary URL to prevent caching: ${timestampedUrl.substring(0, 50)}...`);
+        return timestampedUrl;
+      }
+
+      // For other URLs, return as is
+      return imageUrl;
     }
 
     return imageUrl;

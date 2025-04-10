@@ -539,14 +539,26 @@ export const profileService = {
 
       // Process avatar URL if it's provided
       if (avatar_url) {
-        console.log('Using avatar URL:', avatar_url.substring(0, 50) + '...');
-        processedAvatarUrl = avatar_url;
+        // Remove any timestamp parameters if they exist
+        let cleanAvatarUrl = avatar_url;
+        if (cleanAvatarUrl.includes('?t=')) {
+          cleanAvatarUrl = cleanAvatarUrl.split('?t=')[0];
+          console.log('Cleaned avatar URL from timestamp parameter');
+        }
+        console.log('Using avatar URL:', cleanAvatarUrl.substring(0, 50) + '...');
+        processedAvatarUrl = cleanAvatarUrl;
       }
 
       // Process cover image if it's provided
       if (cover_image) {
-        console.log('Using cover image URL:', cover_image.substring(0, 50) + '...');
-        processedCoverImage = cover_image;
+        // Remove any timestamp parameters if they exist
+        let cleanCoverImage = cover_image;
+        if (cleanCoverImage.includes('?t=')) {
+          cleanCoverImage = cleanCoverImage.split('?t=')[0];
+          console.log('Cleaned cover image URL from timestamp parameter');
+        }
+        console.log('Using cover image URL:', cleanCoverImage.substring(0, 50) + '...');
+        processedCoverImage = cleanCoverImage;
       }
 
       // Create updated user object

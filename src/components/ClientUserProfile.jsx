@@ -195,8 +195,20 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     const avatarInput = document.getElementById('avatar_url');
     const coverInput = document.getElementById('cover_image');
 
-    const avatar_url = avatarInput ? avatarInput.value : formData.get('avatar_url');
-    const cover_image = coverInput ? coverInput.value : formData.get('cover_image');
+    // Get the clean URLs without any timestamp parameters
+    let avatar_url = avatarInput ? avatarInput.value : formData.get('avatar_url');
+    let cover_image = coverInput ? coverInput.value : formData.get('cover_image');
+
+    // Remove any timestamp parameters if they exist
+    if (avatar_url && avatar_url.includes('?t=')) {
+      avatar_url = avatar_url.split('?t=')[0];
+      console.log('Cleaned avatar_url:', avatar_url);
+    }
+
+    if (cover_image && cover_image.includes('?t=')) {
+      cover_image = cover_image.split('?t=')[0];
+      console.log('Cleaned cover_image:', cover_image);
+    }
 
     console.log('Form values:', {
       username,
@@ -228,10 +240,38 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     const usernameChanged = false;
 
     try {
+      console.log('Sending profile update request with data:', JSON.stringify(updatedProfile));
+
+      // Log the specific image URLs being sent
+      if (updatedProfile.avatar_url) {
+        console.log('Avatar URL being sent:', updatedProfile.avatar_url);
+      }
+      if (updatedProfile.cover_image) {
+        console.log('Cover image URL being sent:', updatedProfile.cover_image);
+      }
+
       const result = await profileService.updateProfile(user.id, updatedProfile);
+
+      console.log('Profile update result:', result);
+
       if (result) {
         // Update the local profile state with the updated values
-        setProfile({ ...profile, ...updatedProfile });
+        const updatedProfileState = { ...profile, ...updatedProfile };
+        console.log('Updated profile state:', updatedProfileState);
+        setProfile(updatedProfileState);
+
+        // Update the hidden input values to match the updated profile
+        const avatarInput = document.getElementById('avatar_url');
+        const coverInput = document.getElementById('cover_image');
+
+        if (avatarInput && updatedProfile.avatar_url) {
+          avatarInput.value = updatedProfile.avatar_url;
+        }
+
+        if (coverInput && updatedProfile.cover_image) {
+          coverInput.value = updatedProfile.cover_image;
+        }
+
         toast.success('Profile updated successfully!');
 
         // Switch to the posts tab after successful update
@@ -524,21 +564,25 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                             // Set the image URL directly - no need for adjustment with Cloudinary
                             const hiddenInput = document.getElementById('avatar_url');
                             if (hiddenInput) {
+                              // Store the clean URL without timestamp
                               hiddenInput.value = imageUrl;
                               console.log('Set avatar_url input value to:', imageUrl);
                             }
 
+                            // Add a timestamp to prevent browser caching for preview images
+                            const previewUrl = `${imageUrl}?t=${Date.now()}`;
+
                             // Update ONLY profile picture previews
                             const previewImg = document.querySelector('.preview-profile-pic');
                             if (previewImg) {
-                              previewImg.src = imageUrl;
-                              console.log('Updated preview-profile-pic src to:', imageUrl);
+                              previewImg.src = previewUrl;
+                              console.log('Updated preview-profile-pic src to:', previewUrl);
 
                               // Also update the profile picture in the header if it exists
                               const headerProfilePic = document.querySelector('.header-profile-pic');
                               if (headerProfilePic) {
-                                headerProfilePic.src = imageUrl;
-                                console.log('Updated header-profile-pic src to:', imageUrl);
+                                headerProfilePic.src = previewUrl;
+                                console.log('Updated header-profile-pic src to:', previewUrl);
                               }
                             }
                           }
@@ -547,7 +591,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                         initialImage={profile.avatar_url}
                         aspectRatio={1}
                         imageType="profile"
-                        uniqueId="profile-pic-uploader"
+                        uniqueId={`profile-pic-uploader-${Date.now()}`}
                       />
                       {profile.avatar_url && (
                         <div className="mt-2">
@@ -580,21 +624,25 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                             // Set the image URL directly - no need for adjustment with Cloudinary
                             const hiddenInput = document.getElementById('cover_image');
                             if (hiddenInput) {
+                              // Store the clean URL without timestamp
                               hiddenInput.value = imageUrl;
                               console.log('Set cover_image input value to:', imageUrl);
                             }
 
+                            // Add a timestamp to prevent browser caching for preview images
+                            const previewUrl = `${imageUrl}?t=${Date.now()}`;
+
                             // Update ONLY cover image previews
                             const previewImg = document.querySelector('.preview-cover-image');
                             if (previewImg) {
-                              previewImg.src = imageUrl;
-                              console.log('Updated preview-cover-image src to:', imageUrl);
+                              previewImg.src = previewUrl;
+                              console.log('Updated preview-cover-image src to:', previewUrl);
 
                               // Also update the cover image in the header if it exists
                               const headerCoverImg = document.querySelector('.header-cover-image');
                               if (headerCoverImg) {
-                                headerCoverImg.src = imageUrl;
-                                console.log('Updated header-cover-image src to:', imageUrl);
+                                headerCoverImg.src = previewUrl;
+                                console.log('Updated header-cover-image src to:', previewUrl);
                               }
                             }
                           }
@@ -603,7 +651,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
                         initialImage={profile.cover_image}
                         aspectRatio={3}
                         imageType="cover"
-                        uniqueId="cover-image-uploader"
+                        uniqueId={`cover-image-uploader-${Date.now()}`}
                       />
                       {profile.cover_image && (
                         <div className="mt-2">

@@ -7,8 +7,14 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
   const [isUploading, setIsUploading] = useState(false);
   const cloudinaryWidget = useRef(null);
 
-  // Create a unique ID for this uploader instance
-  const uploaderId = useRef(`${imageType}-${uniqueId}`).current;
+  // Create a truly unique ID for this uploader instance that includes the type
+  // This ensures profile and cover uploaders don't conflict
+  const uploaderId = useRef(`${imageType}-${uniqueId}-${Date.now()}`).current;
+
+  // Store a static reference to track active uploaders globally
+  if (!window.activeUploaders) {
+    window.activeUploaders = {};
+  }
 
   // Set initial image if provided
   useEffect(() => {
@@ -50,7 +56,13 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
     // Cleanup function
     return () => {
       console.log(`Cleaning up Cloudinary widget for ${imageType} with ID: ${uniqueId} (uploaderId: ${uploaderId})`);
-      // Clear any data attributes related to this uploader
+      // Clear this uploader from the global tracking object
+      if (window.activeUploaders && window.activeUploaders[uploaderId]) {
+        delete window.activeUploaders[uploaderId];
+        console.log(`Removed uploader ${uploaderId} from global tracking`);
+      }
+
+      // Also clean up the old tracking method for backward compatibility
       if (document.body.getAttribute('data-active-uploader') === uploaderId) {
         document.body.removeAttribute('data-active-uploader');
       }
@@ -72,8 +84,8 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
           croppingAspectRatio: aspectRatio,
           folder: `ablog/${type}s`,
           maxFileSize: 5000000, // 5MB
-          // Add a unique ID to this widget instance
-          publicId: uploaderId,
+          // Add a unique ID to this widget instance with timestamp and uploader ID to ensure uniqueness
+          publicId: `${type}_${uploaderId}_${Date.now()}`,
           styles: {
             palette: {
               window: "#000000",
@@ -95,36 +107,68 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
         (error, result) => {
           // Check if this callback is for the active uploader
           const activeUploader = document.body.getAttribute('data-active-uploader');
+          const isActiveInNewSystem = window.activeUploaders && window.activeUploaders[uploaderId];
+
           console.log(`Widget ${widgetId} (${type}) callback:`, result ? result.event : 'No result');
-          console.log(`Active uploader: ${activeUploader}, This uploader: ${uploaderId}`);
+          console.log(`Active uploader (old system): ${activeUploader}, This uploader: ${uploaderId}`);
+          console.log(`Is active in new tracking system: ${isActiveInNewSystem ? 'YES' : 'NO'}`);
+
+          // List all active uploaders for debugging
+          if (window.activeUploaders) {
+            const activeKeys = Object.keys(window.activeUploaders);
+            if (activeKeys.length > 0) {
+              console.log('Currently active uploaders:', activeKeys);
+            }
+          }
 
           // Only process the callback if it's for this uploader or if we're closing
-          if (activeUploader === uploaderId || (result && result.event === "close")) {
+          // Check both the old and new tracking systems
+          if (activeUploader === uploaderId || isActiveInNewSystem || (result && result.event === "close")) {
             if (!error && result && result.event === "success") {
               const imageUrl = result.info.secure_url;
               console.log(`${type} upload successful:`, imageUrl);
 
-              // Add a timestamp parameter to prevent caching
-              const timestampedUrl = `${imageUrl}?t=${Date.now()}`;
-              console.log(`Using timestamped URL to prevent caching:`, timestampedUrl);
+              // Use the original URL without timestamp for the actual data
+              // This prevents issues with URL comparison and duplicate images
+              const originalUrl = imageUrl;
 
-              setPreview(timestampedUrl);
+              // Add a timestamp parameter only for preview to prevent caching
+              const previewUrl = `${imageUrl}?t=${Date.now()}`;
+              console.log(`Using timestamped URL for preview:`, previewUrl);
+
+              setPreview(previewUrl);
               setError('');
               if (onImageSelect) {
-                onImageSelect(timestampedUrl);
+                // Pass the original URL to the parent component for storage
+                onImageSelect(originalUrl);
               }
               setIsUploading(false);
-              // Clear the active uploader data attribute
+              // Clear this uploader from tracking systems
+              if (window.activeUploaders && window.activeUploaders[uploaderId]) {
+                delete window.activeUploaders[uploaderId];
+                console.log(`Removed ${type} uploader from global tracking after success`);
+              }
+              // Also clear the old tracking method
               document.body.removeAttribute('data-active-uploader');
             } else if (error) {
               console.error(`${type} upload error:`, error);
               setError('Error uploading image. Please try again.');
               setIsUploading(false);
-              // Clear the active uploader data attribute
+              // Clear this uploader from tracking systems
+              if (window.activeUploaders && window.activeUploaders[uploaderId]) {
+                delete window.activeUploaders[uploaderId];
+                console.log(`Removed ${type} uploader from global tracking after error`);
+              }
+              // Also clear the old tracking method
               document.body.removeAttribute('data-active-uploader');
             } else if (result && result.event === "close") {
               setIsUploading(false);
-              // Clear the active uploader data attribute
+              // Clear this uploader from tracking systems
+              if (window.activeUploaders && window.activeUploaders[uploaderId]) {
+                delete window.activeUploaders[uploaderId];
+                console.log(`Removed ${type} uploader from global tracking after close`);
+              }
+              // Also clear the old tracking method
               document.body.removeAttribute('data-active-uploader');
             }
           } else {
@@ -139,10 +183,31 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
     console.log(`Opening widget for ${imageType} with ID: ${uniqueId} (uploaderId: ${uploaderId})`);
     if (cloudinaryWidget.current) {
       setIsUploading(true);
-      // Add a data attribute to track which uploader is currently active
+
+      // Clear any existing active uploaders first to prevent conflicts
+      if (window.activeUploaders) {
+        // Log what was active before
+        const activeKeys = Object.keys(window.activeUploaders);
+        if (activeKeys.length > 0) {
+          console.log('Clearing previously active uploaders:', activeKeys);
+        }
+
+        // Reset the tracking object
+        window.activeUploaders = {};
+      }
+
+      // Register this uploader as the active one
+      window.activeUploaders[uploaderId] = {
+        type: imageType,
+        id: uniqueId,
+        timestamp: Date.now()
+      };
+      console.log(`Set ${imageType} uploader as active:`, uploaderId);
+
+      // Also use the old tracking method for backward compatibility
       document.body.setAttribute('data-active-uploader', uploaderId);
-      // Add a class to mark this uploader as active
       document.body.classList.add('cloudinary-uploader-active');
+
       // Open the widget with a specific context to ensure it's the right one
       cloudinaryWidget.current.open();
     } else {
