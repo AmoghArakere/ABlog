@@ -108,6 +108,8 @@ const processContent = (content) => {
 };
 
 export default function ClientBlogPost({ slug }) {
+  console.log(`ClientBlogPost component initialized with slug: ${slug}`);
+
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -116,109 +118,206 @@ export default function ClientBlogPost({ slug }) {
   const [bookmarked, setBookmarked] = useState(false);
   const [relatedPosts, setRelatedPosts] = useState([]);
   const [user, setUser] = useState(null);
+  const [renderCount, setRenderCount] = useState(0);
+
+  // Track component renders
+  useEffect(() => {
+    console.log(`ClientBlogPost render #${renderCount + 1} with post:`, post);
+    setRenderCount(prev => prev + 1);
+  });
 
   useEffect(() => {
+    console.log('[useEffect] Blog post effect running');
+    // Flag to track if component is mounted
+    let isMounted = true;
+
     // Get the current user from localStorage
     const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
+    if (isMounted) {
+      console.log('[useEffect] Setting user state');
+      setUser(currentUser);
+    }
 
     const fetchPost = async () => {
       try {
-        setLoading(true);
-        console.log(`Fetching post with slug: ${slug}`);
+        if (isMounted) setLoading(true);
+        console.log(`[fetchPost] Starting to fetch post with slug: ${slug}`);
+
+        let fetchedPost = null;
 
         // Try to fetch from API first
         try {
-          console.log('Attempting to fetch post from API...');
+          console.log('[fetchPost] Attempting to fetch post from API...');
           const postData = await apiBlogService.getPostBySlug(slug);
 
           if (postData) {
-            console.log('Post found in API:', postData);
-            setPost(postData);
+            console.log('[fetchPost] Post found in API:', postData);
+            fetchedPost = postData;
+            if (isMounted) {
+              console.log('[fetchPost] Setting post state with API data');
+              setPost(postData);
+              console.log('[fetchPost] Post state set with API data');
+            } else {
+              console.log('[fetchPost] Component unmounted, not setting state');
+              return;
+            }
           } else {
-            console.log('Post not found in API, falling back to localStorage');
+            console.log('[fetchPost] Post not found in API, falling back to localStorage');
             // Fallback to localStorage
             const localPostData = await blogService.getPostBySlug(slug);
 
             if (!localPostData) {
-              console.error('Post not found in localStorage either');
-              setError('Post not found');
-              setLoading(false);
+              console.error('[fetchPost] Post not found in localStorage either');
+              if (isMounted) {
+                setError('Post not found');
+                setLoading(false);
+                console.log('[fetchPost] Set error state and finished loading');
+              }
               return;
             }
 
-            console.log('Post found in localStorage:', localPostData);
-            setPost(localPostData);
+            fetchedPost = localPostData;
+            console.log('[fetchPost] Post found in localStorage:', localPostData);
+            if (isMounted) {
+              console.log('[fetchPost] Setting post state with localStorage data');
+              setPost(localPostData);
+              console.log('[fetchPost] Post state set with localStorage data');
+            } else {
+              console.log('[fetchPost] Component unmounted, not setting state');
+              return;
+            }
           }
         } catch (apiError) {
-          console.error('Error fetching post from API:', apiError);
+          console.error('[fetchPost] Error fetching post from API:', apiError);
 
           // Fallback to localStorage
-          console.log('Falling back to localStorage due to API error');
+          console.log('[fetchPost] Falling back to localStorage due to API error');
           const localPostData = await blogService.getPostBySlug(slug);
 
           if (!localPostData) {
-            console.error('Post not found in localStorage either');
-            setError('Post not found');
-            setLoading(false);
+            console.error('[fetchPost] Post not found in localStorage either');
+            if (isMounted) {
+              setError('Post not found');
+              setLoading(false);
+              console.log('[fetchPost] Set error state and finished loading');
+            }
             return;
           }
 
-          console.log('Post found in localStorage:', localPostData);
-          setPost(localPostData);
+          fetchedPost = localPostData;
+          console.log('[fetchPost] Post found in localStorage:', localPostData);
+          if (isMounted) {
+            console.log('[fetchPost] Setting post state with localStorage data');
+            setPost(localPostData);
+            console.log('[fetchPost] Post state set with localStorage data');
+          } else {
+            console.log('[fetchPost] Component unmounted, not setting state');
+            return;
+          }
         }
 
-        // At this point, post is set in state
-        // Use the post from state to fetch likes and bookmarks
-        const currentPost = post || {};
+        // Check if component is still mounted before continuing
+        if (!isMounted) {
+          console.log('[fetchPost] Component unmounted, stopping execution');
+          return;
+        }
+
+        // At this point, we have the post data in the fetchedPost variable
+        // We can use it directly rather than relying on the state which might not have updated yet
+        console.log('[fetchPost] Working with fetched post:', fetchedPost);
 
         // Fetch like count if we have a post
-        if (currentPost.id) {
-          console.log(`Fetching like count for post ID: ${currentPost.id}`);
-          const likes = await likeService.getLikeCount(currentPost.id);
-          setLikeCount(likes);
+        if (fetchedPost.id) {
+          console.log(`[fetchPost] Fetching like count for post ID: ${fetchedPost.id}`);
+          const likes = await likeService.getLikeCount(fetchedPost.id);
+          console.log(`[fetchPost] Like count: ${likes}`);
+          if (isMounted) setLikeCount(likes);
 
           // Check if user has liked or bookmarked the post
           if (currentUser) {
-            const hasLiked = await likeService.hasLiked(currentPost.id, currentUser.id);
-            setLiked(hasLiked);
+            console.log(`[fetchPost] Checking if user ${currentUser.id} has liked/bookmarked post ${fetchedPost.id}`);
+            const hasLiked = await likeService.hasLiked(fetchedPost.id, currentUser.id);
+            if (isMounted) setLiked(hasLiked);
+            console.log(`[fetchPost] User has liked post: ${hasLiked}`);
 
-            const hasBookmarked = await bookmarkService.hasBookmarked(currentPost.id, currentUser.id);
-            setBookmarked(hasBookmarked);
+            const hasBookmarked = await bookmarkService.hasBookmarked(fetchedPost.id, currentUser.id);
+            if (isMounted) setBookmarked(hasBookmarked);
+            console.log(`[fetchPost] User has bookmarked post: ${hasBookmarked}`);
           }
         } else {
-          console.log('No post ID available yet, skipping like/bookmark fetch');
+          console.log('[fetchPost] No post ID available, skipping like/bookmark fetch');
+        }
+
+        // Check if component is still mounted before continuing
+        if (!isMounted) {
+          console.log('[fetchPost] Component unmounted, stopping execution');
+          return;
         }
 
         // Fetch related posts (posts with same category or by same author)
-        if (currentPost.categories && currentPost.categories.length > 0) {
-          console.log(`Fetching posts with category: ${currentPost.categories[0].slug}`);
+        if (fetchedPost.categories && fetchedPost.categories.length > 0) {
+          console.log(`[fetchPost] Fetching posts with category: ${fetchedPost.categories[0].slug}`);
           try {
             const { posts: related } = await blogService.getPosts({
-              category: currentPost.categories[0].slug,
+              category: fetchedPost.categories[0].slug,
               limit: 3
             });
 
             // Filter out the current post
-            const filteredPosts = related.filter(p => p.id !== currentPost.id);
-            console.log(`Found ${filteredPosts.length} related posts by category`);
-            setRelatedPosts(filteredPosts);
+            const filteredPosts = related.filter(p => p.id !== fetchedPost.id);
+            console.log(`[fetchPost] Found ${filteredPosts.length} related posts by category`);
+            if (isMounted) setRelatedPosts(filteredPosts);
           } catch (error) {
-            console.error('Error fetching related posts by category:', error);
+            console.error('[fetchPost] Error fetching related posts by category:', error);
+          }
+        } else if (fetchedPost.author_id) {
+          console.log(`[fetchPost] Fetching posts by author: ${fetchedPost.author_id}`);
+          try {
+            const { posts: related } = await blogService.getPosts({
+              authorId: fetchedPost.author_id,
+              limit: 3
+            });
+
+            // Filter out the current post
+            const filteredPosts = related.filter(p => p.id !== fetchedPost.id);
+            console.log(`[fetchPost] Found ${filteredPosts.length} related posts by author`);
+            if (isMounted) setRelatedPosts(filteredPosts);
+          } catch (error) {
+            console.error('[fetchPost] Error fetching related posts by author:', error);
           }
         }
 
-        setLoading(false);
+        // Check if component is still mounted before finishing
+        if (!isMounted) {
+          console.log('[fetchPost] Component unmounted, stopping execution');
+          return;
+        }
+
+        // Set loading to false only if component is still mounted
+        if (isMounted) {
+          console.log('[fetchPost] Setting loading to false');
+          setLoading(false);
+        }
       } catch (err) {
-        console.error('Error fetching post:', err);
-        setError('Failed to load post');
-        setLoading(false);
+        console.error('[fetchPost] Error fetching post:', err);
+        if (isMounted) {
+          console.log('[fetchPost] Setting error state due to exception');
+          setError('Failed to load post');
+          setLoading(false);
+        }
       }
     };
 
     if (slug) {
+      console.log(`[useEffect] Starting fetchPost for slug: ${slug}`);
       fetchPost();
     }
+
+    // Cleanup function to run when component unmounts or slug changes
+    return () => {
+      console.log('[useEffect] Cleanup function running, setting isMounted to false');
+      isMounted = false;
+    };
   }, [slug]);
 
   const handleLike = async () => {
