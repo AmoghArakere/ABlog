@@ -1,4 +1,4 @@
-import { pool } from '../db/pool';
+import pool from '../db/connection';
 
 const commentService = {
   // Get comments for a post with pagination
@@ -6,10 +6,10 @@ const commentService = {
     try {
       // Calculate offset
       const offset = (page - 1) * limit;
-      
+
       // Get comments
       const commentsResult = await pool.query(`
-        SELECT 
+        SELECT
           c.id, c.content, c.post_id, c.author_id, c.created_at, c.updated_at,
           u.username, u.full_name, u.avatar_url
         FROM comments c
@@ -18,12 +18,12 @@ const commentService = {
         ORDER BY c.created_at DESC
         LIMIT $2 OFFSET $3
       `, [postId, limit, offset]);
-      
+
       // Get total count
       const countResult = await pool.query('SELECT COUNT(*) FROM comments WHERE post_id = $1', [postId]);
       const totalCount = parseInt(countResult.rows[0].count);
       const totalPages = Math.ceil(totalCount / limit);
-      
+
       // Format comments
       const comments = commentsResult.rows.map(row => ({
         id: row.id,
@@ -39,7 +39,7 @@ const commentService = {
           avatar_url: row.avatar_url
         }
       }));
-      
+
       return {
         comments,
         totalCount,
@@ -51,25 +51,25 @@ const commentService = {
       throw error;
     }
   },
-  
+
   // Get a comment by ID
   async getCommentById(id) {
     try {
       const result = await pool.query(`
-        SELECT 
+        SELECT
           c.id, c.content, c.post_id, c.author_id, c.created_at, c.updated_at,
           u.username, u.full_name, u.avatar_url
         FROM comments c
         JOIN users u ON c.author_id = u.id
         WHERE c.id = $1
       `, [id]);
-      
+
       if (result.rows.length === 0) {
         return null;
       }
-      
+
       const row = result.rows[0];
-      
+
       return {
         id: row.id,
         content: row.content,
@@ -89,42 +89,42 @@ const commentService = {
       throw error;
     }
   },
-  
+
   // Add a comment to a post
   async addComment(postId, authorId, content) {
     try {
       // Check if post exists
       const postCheck = await pool.query('SELECT id FROM posts WHERE id = $1', [postId]);
-      
+
       if (postCheck.rows.length === 0) {
         throw new Error('Post not found');
       }
-      
+
       // Check if user exists
       const userCheck = await pool.query('SELECT id FROM users WHERE id = $1', [authorId]);
-      
+
       if (userCheck.rows.length === 0) {
         throw new Error('User not found');
       }
-      
+
       // Add comment
       const result = await pool.query(`
         INSERT INTO comments (post_id, author_id, content)
         VALUES ($1, $2, $3)
         RETURNING id, post_id, author_id, content, created_at, updated_at
       `, [postId, authorId, content]);
-      
+
       const comment = result.rows[0];
-      
+
       // Get author information
       const authorResult = await pool.query(`
         SELECT id, username, full_name, avatar_url
         FROM users
         WHERE id = $1
       `, [authorId]);
-      
+
       const author = authorResult.rows[0];
-      
+
       return {
         ...comment,
         author
@@ -134,7 +134,7 @@ const commentService = {
       throw error;
     }
   },
-  
+
   // Update a comment
   async updateComment(id, content) {
     try {
@@ -144,22 +144,22 @@ const commentService = {
         WHERE id = $2
         RETURNING id, post_id, author_id, content, created_at, updated_at
       `, [content, id]);
-      
+
       if (result.rows.length === 0) {
         return null;
       }
-      
+
       const comment = result.rows[0];
-      
+
       // Get author information
       const authorResult = await pool.query(`
         SELECT id, username, full_name, avatar_url
         FROM users
         WHERE id = $1
       `, [comment.author_id]);
-      
+
       const author = authorResult.rows[0];
-      
+
       return {
         ...comment,
         author
@@ -169,12 +169,12 @@ const commentService = {
       throw error;
     }
   },
-  
+
   // Delete a comment
   async deleteComment(id) {
     try {
       const result = await pool.query('DELETE FROM comments WHERE id = $1 RETURNING id', [id]);
-      
+
       return {
         success: result.rows.length > 0
       };
