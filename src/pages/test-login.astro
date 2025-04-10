@@ -1,0 +1,143 @@
+---
+// Test login page
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #121212;
+      color: #fff;
+    }
+    h1 {
+      color: #fff;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    input {
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #444;
+      background-color: #222;
+      color: #fff;
+    }
+    button {
+      padding: 10px;
+      background-color: #8b5cf6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #7c3aed;
+    }
+    .error {
+      color: #ef4444;
+      margin-bottom: 10px;
+    }
+    .success {
+      color: #10b981;
+      margin-bottom: 10px;
+    }
+    pre {
+      background-color: #222;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test Login</h1>
+  
+  <div id="error" class="error" style="display: none;"></div>
+  <div id="success" class="success" style="display: none;"></div>
+  
+  <form id="loginForm">
+    <div>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" value="simple@example.com" required>
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" value="test123" required>
+    </div>
+    <button type="submit">Login</button>
+  </form>
+  
+  <h2>Response:</h2>
+  <pre id="response">No response yet</pre>
+  
+  <h2>Test API:</h2>
+  <button id="testApi">Test API</button>
+  <pre id="apiResponse">No response yet</pre>
+  
+  <script>
+    // Login form submission
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      document.getElementById('error').style.display = 'none';
+      document.getElementById('success').style.display = 'none';
+      
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+        
+        const responseText = await response.text();
+        document.getElementById('response').textContent = responseText;
+        
+        try {
+          const data = JSON.parse(responseText);
+          
+          if (data.success) {
+            document.getElementById('success').textContent = 'Login successful!';
+            document.getElementById('success').style.display = 'block';
+          } else {
+            document.getElementById('error').textContent = data.error || 'Login failed';
+            document.getElementById('error').style.display = 'block';
+          }
+        } catch (error) {
+          document.getElementById('error').textContent = 'Invalid JSON response';
+          document.getElementById('error').style.display = 'block';
+        }
+      } catch (error) {
+        document.getElementById('error').textContent = error.message;
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('response').textContent = error.toString();
+      }
+    });
+    
+    // Test API button
+    document.getElementById('testApi').addEventListener('click', async () => {
+      try {
+        const response = await fetch('/api/test');
+        const responseText = await response.text();
+        document.getElementById('apiResponse').textContent = responseText;
+      } catch (error) {
+        document.getElementById('apiResponse').textContent = error.toString();
+      }
+    });
+  </script>
+</body>
+</html>
