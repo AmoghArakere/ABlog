@@ -136,14 +136,14 @@ const userService = {
         'SELECT * FROM users WHERE email = $1',
         [email]
       );
-      
+
       return result.rows[0] || null;
     } catch (error) {
       console.error('Error getting user by email:', error);
       throw error;
     }
   },
-  
+
   // Get user by username
   async getUserByUsername(username) {
     try {
@@ -151,62 +151,62 @@ const userService = {
         'SELECT id, email, username, full_name, avatar_url, cover_image, bio, website, location, created_at, updated_at FROM users WHERE username = $1',
         [username]
       );
-      
+
       return result.rows[0] || null;
     } catch (error) {
       console.error('Error getting user by username:', error);
       throw error;
     }
   },
-  
+
   // Create a new user
   async createUser(userData) {
     try {
       const { email, password, username, full_name, avatar_url, cover_image, bio, website, location } = userData;
-      
+
       // Hash the password
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
-      
+
       // Generate username from email if not provided
       const finalUsername = username || email.split('@')[0];
-      
+
       // Insert the user
       const result = await pool.query(
         `INSERT INTO users (
           email, password, username, full_name, avatar_url, cover_image, bio, website, location
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         RETURNING id, email, username, full_name, avatar_url, cover_image, bio, website, location, created_at, updated_at`,
         [email, hashedPassword, finalUsername, full_name || '', avatar_url || '', cover_image || '', bio || '', website || '', location || '']
       );
-      
+
       return result.rows[0];
     } catch (error) {
       console.error('Error creating user:', error);
       throw error;
     }
   },
-  
+
   // Verify password
   async verifyPassword(email, password) {
     try {
       // Get the user
       const user = await this.getUserByEmail(email);
-      
+
       if (!user) {
         return { success: false, error: 'Invalid email or password' };
       }
-      
+
       // Compare passwords
       const match = await bcrypt.compare(password, user.password);
-      
+
       if (!match) {
         return { success: false, error: 'Invalid email or password' };
       }
-      
+
       // Return user without password
       const { password: _, ...userWithoutPassword } = user;
-      
+
       return { success: true, user: userWithoutPassword };
     } catch (error) {
       console.error('Error verifying password:', error);
@@ -308,14 +308,75 @@ const authService = {
 exports.handler = async function(event, context) {
   // Initialize database
   await initDatabase();
-  
+
+  // Log the full event for debugging
+  console.log('Full event:', JSON.stringify(event, null, 2));
+
   // Get the path from the event
-  const path = event.path.replace('/.netlify/functions/api/', '');
+  let path = '';
+  if (event.path.includes('/.netlify/functions/api/')) {
+    path = event.path.replace('/.netlify/functions/api/', '');
+  } else if (event.path.includes('/api/')) {
+    path = event.path.replace('/api/', '');
+  } else {
+    // Handle case where path doesn't include expected prefix
+    path = event.rawUrl ? new URL(event.rawUrl).pathname.replace('/api/', '') : '';
+  }
+
   const segments = path.split('/');
-  
+
   console.log(`API request to: ${path}`);
   console.log('HTTP method:', event.httpMethod);
-  
+  console.log('Path segments:', segments);
+
+  // Special case for when the path is empty or just "auth"
+  if (path === '' || path === 'auth') {
+    // Check if this is a login or register request based on the body
+    try {
+      const body = JSON.parse(event.body || '{}');
+      if (body.email && body.password) {
+        if (event.httpMethod === 'POST') {
+          // Check if this is a register request (has username)
+          if (body.username) {
+            console.log(`Registration attempt for: ${body.email}`);
+
+            const result = await authService.signUp(body.email, body.password, {
+              username: body.username,
+              full_name: body.full_name || '',
+              avatar_url: body.avatar_url || '',
+              bio: body.bio || '',
+              website: body.website || '',
+              location: body.location || ''
+            });
+
+            return {
+              statusCode: result.success ? 201 : 400,
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(result)
+            };
+          } else {
+            // Assume it's a login request
+            console.log(`Login attempt for: ${body.email}`);
+
+            const result = await authService.signIn(body.email, body.password);
+
+            return {
+              statusCode: result.success ? 200 : 401,
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(result)
+            };
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing request body:', error);
+    }
+  }
+
   // Handle different API endpoints
   if (segments[0] === 'auth') {
     // Auth endpoints
@@ -323,11 +384,11 @@ exports.handler = async function(event, context) {
       try {
         const body = JSON.parse(event.body);
         const { email, password } = body;
-        
+
         console.log(`Login attempt for: ${email}`);
-        
+
         const result = await authService.signIn(email, password);
-        
+
         return {
           statusCode: result.success ? 200 : 401,
           headers: {
@@ -337,7 +398,7 @@ exports.handler = async function(event, context) {
         };
       } catch (error) {
         console.error('Error in login endpoint:', error);
-        
+
         return {
           statusCode: 500,
           headers: {
@@ -353,9 +414,9 @@ exports.handler = async function(event, context) {
       try {
         const body = JSON.parse(event.body);
         const { email, password, username, full_name } = body;
-        
+
         console.log(`Registration attempt for: ${email}`);
-        
+
         const result = await authService.signUp(email, password, {
           username,
           full_name,
@@ -364,7 +425,7 @@ exports.handler = async function(event, context) {
           website: body.website || '',
           location: body.location || ''
         });
-        
+
         return {
           statusCode: result.success ? 201 : 400,
           headers: {
@@ -374,7 +435,7 @@ exports.handler = async function(event, context) {
         };
       } catch (error) {
         console.error('Error in register endpoint:', error);
-        
+
         return {
           statusCode: 500,
           headers: {
@@ -401,7 +462,7 @@ exports.handler = async function(event, context) {
       })
     };
   }
-  
+
   // If no endpoint matched, return 404
   return {
     statusCode: 404,
