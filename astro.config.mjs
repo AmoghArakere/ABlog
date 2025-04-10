@@ -10,5 +10,10 @@ export default defineConfig({
   output: 'server',
   adapter: netlify({
     edgeMiddleware: true
-  })
+  }),
+  // Configure API routes
+  routes: [
+    // API routes should be handled by the server
+    { pattern: '/api/*', entrypoint: 'src/pages/api/[...path].js' }
+  ]
 });
