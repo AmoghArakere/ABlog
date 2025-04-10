@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { blogService } from '../lib/localStorageService';
 import authService from '../lib/authService';
 import RichTextEditor from './RichTextEditor';
-import CloudinaryUploader from './CloudinaryUploader';
+import ImageUploader from './ImageUploader';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
@@ -377,16 +377,13 @@ export default function ClientEditPostForm({ slug, post: initialPost }) {
           <div>
             <Label htmlFor="coverImage" className="block text-sm font-medium mb-2">Cover Image</Label>
             <div className="mb-4">
-              <CloudinaryUploader
-                onImageSelect={(imageUrl) => {
-                  console.log('Cloudinary image URL:', imageUrl);
-                  setCoverImage(imageUrl);
+              <ImageUploader
+                onImageSelect={(imageData) => {
+                  console.log('Image selected, data length:', imageData ? imageData.length : 0);
+                  setCoverImage(imageData);
                 }}
                 buttonText="Upload Cover Image"
                 initialImage={coverImage}
-                aspectRatio={16/9}
-                imageType="post"
-                uniqueId="edit-post-cover-image-uploader"
               />
             </div>
 

@@ -30,6 +30,7 @@ ABlog is a modern, feature-rich blogging platform built with Astro.js and Postgr
 - **Authentication**: JWT-based authentication
 - **Image Storage**: Cloudinary
 - **Comments**: Giscus
+- **Content**: Markdown files with Astro Content Collections
 
 ## 🧞 Commands
 

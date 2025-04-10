@@ -1,6 +1,7 @@
 ---
 import { getCollection, getEntry } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+<<<<<<< HEAD
 
 // Format date function
 const formatDate = (date) => {
@@ -18,6 +19,9 @@ const calculateReadTime = (content) => {
   const readTime = Math.ceil(words / wordsPerMinute);
   return readTime > 0 ? readTime : 1; // Minimum 1 minute read time
 };
+=======
+import { formatDate, calculateReadTime } from '../../utils/dateUtils';
+>>>>>>> b1ea644741f3fd8fe674fc55b48b28629d3ad8b7
 
 // Enable static prerendering
 export const prerender = true;
@@ -27,7 +31,11 @@ export async function getStaticPaths() {
   const blogEntries = await getCollection('blog', ({ data }) => {
     return !data.draft;
   });
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> b1ea644741f3fd8fe674fc55b48b28629d3ad8b7
   return blogEntries.map(entry => ({
     params: { slug: entry.slug },
     props: { entry },
@@ -80,6 +88,7 @@ const readTime = entry.body ? calculateReadTime(entry.body) : 0;
             ))}
           </div>
         )}
+<<<<<<< HEAD
         
         <h1 class="text-4xl font-bold mb-4 text-white">{entry.data.title}</h1>
         
@@ -90,6 +99,18 @@ const readTime = entry.body ? calculateReadTime(entry.body) : 0;
             {authorData?.data.avatar ? (
               <img 
                 src={authorData.data.avatar} 
+=======
+
+        <h1 class="text-4xl font-bold mb-4 text-white">{entry.data.title}</h1>
+
+        <p class="text-xl text-gray-300 mb-6">{entry.data.description}</p>
+
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center">
+            {authorData?.data.avatar ? (
+              <img
+                src={authorData.data.avatar}
+>>>>>>> b1ea644741f3fd8fe674fc55b48b28629d3ad8b7
                 alt={authorData.data.name}
                 class="w-12 h-12 rounded-full mr-4 object-cover"
               />
@@ -100,7 +121,11 @@ const readTime = entry.body ? calculateReadTime(entry.body) : 0;
                 </span>
               </div>
             )}
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> b1ea644741f3fd8fe674fc55b48b28629d3ad8b7
             <div>
               <p class="font-medium text-white">
                 {authorData?.data.name || entry.data.author}
@@ -111,19 +136,32 @@ const readTime = entry.body ? calculateReadTime(entry.body) : 0;
             </div>
           </div>
         </div>
+<<<<<<< HEAD
         
         {entry.data.heroImage && (
           <div class="rounded-lg overflow-hidden mb-10 max-h-[500px]">
             <img 
               src={entry.data.heroImage} 
+=======
+
+        {entry.data.heroImage && (
+          <div class="rounded-lg overflow-hidden mb-10 max-h-[500px]">
+            <img
+              src={entry.data.heroImage}
+>>>>>>> b1ea644741f3fd8fe674fc55b48b28629d3ad8b7
               alt={entry.data.title}
               class="w-full h-full object-cover"
             />
           </div>
         )}
       </header>
+<<<<<<< HEAD
       
       <div class="prose prose-lg max-w-none prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400 prose-strong:text-white prose-code:text-purple-300 prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-700">
+=======
+
+      <div class="prose prose-lg max-w-none dark:prose-invert prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400 prose-strong:text-white prose-code:text-purple-300 prose-pre:bg-gray-900 prose-pre:border prose-pre:border-gray-700">
+>>>>>>> b1ea644741f3fd8fe674fc55b48b28629d3ad8b7
         {renderError ? (
           <div class="p-4 bg-red-900/30 border border-red-700 rounded-md">
             <h2 class="text-xl font-bold text-red-400 mb-2">Error Rendering Content</h2>
@@ -133,7 +171,11 @@ const readTime = entry.body ? calculateReadTime(entry.body) : 0;
           <Content />
         )}
       </div>
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> b1ea644741f3fd8fe674fc55b48b28629d3ad8b7
       {entry.data.tags && entry.data.tags.length > 0 && (
         <div class="mt-12 pt-6 border-t border-gray-700">
           <h3 class="text-lg font-medium mb-4 text-white">Tags</h3>

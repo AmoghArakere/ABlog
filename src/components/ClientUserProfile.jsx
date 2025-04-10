@@ -7,7 +7,6 @@ import ClientBlogPostCard from './ClientBlogPostCard';
 import ImageUploader from './ImageUploader';
 import ImageAdjuster from './ImageAdjuster';
 import CloudinaryUploader from './CloudinaryUploader';
-import DirectImageUploader from './DirectImageUploader';
 
 export default function ClientUserProfile({ username, isCurrentUser = false }) {
   const toast = useToastContext();
@@ -140,15 +139,10 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
-    console.log('handleUpdateProfile called');
 
-    if ((!user || user.id !== profile.id) && !isCurrentUser) {
-      console.error('User not authorized to update this profile');
-      return;
-    }
+    if ((!user || user.id !== profile.id) && !isCurrentUser) return;
 
     const formData = new FormData(e.target);
-    console.log('Form submitted with these elements:', [...formData.entries()]);
 
     // Get values from form - username is now fixed and cannot be changed
     const username = profile.username; // Use the existing username
@@ -158,16 +152,6 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     const cover_image = formData.get('cover_image');
     const website = formData.get('website');
     const location = formData.get('location');
-
-    console.log('Form values extracted:', {
-      username,
-      full_name,
-      bio,
-      avatar_url: avatar_url ? `${avatar_url.substring(0, 30)}...` : null,
-      cover_image: cover_image ? `${cover_image.substring(0, 30)}...` : null,
-      website,
-      location
-    });
 
     // Only include fields that have changed - username is excluded as it cannot be changed
     const updatedProfile = {};
@@ -182,11 +166,7 @@ export default function ClientUserProfile({ username, isCurrentUser = false }) {
     if (website !== profile.website) updatedProfile.website = website;
     if (location !== profile.location) updatedProfile.location = location;
 
-    console.log('Updating profile with:', {
-      ...updatedProfile,
-      avatar_url: updatedProfile.avatar_url ? `${updatedProfile.avatar_url.substring(0, 30)}...` : null,
-      cover_image: updatedProfile.cover_image ? `${updatedProfile.cover_image.substring(0, 30)}...` : null
-    });
+    console.log('Updating profile with:', updatedProfile);
 
     // Username changes are no longer possible
     const usernameChanged = false;
