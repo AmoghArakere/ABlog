@@ -308,25 +308,30 @@ export default function ClientBlogPost({ slug }) {
               {post.author && post.author.avatar_url ? (
                 <img
                   src={post.author.avatar_url}
-                  alt={post.author.full_name || post.author.username}
+                  alt={(post.author.full_name || post.author.username || 'Author')}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/images/placeholder-profile.svg';
+                    console.log('Author avatar failed to load, using placeholder');
+                  }}
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-purple-600 text-white text-sm font-bold">
-                  {post.author ? (post.author.username?.charAt(0).toUpperCase() || 'A') : 'A'}
+                  {post.author && post.author.username ? post.author.username.charAt(0).toUpperCase() : 'A'}
                 </div>
               )}
             </div>
             <div className="ml-3">
-              <a href={`/user/${post.author ? post.author.username : ''}`} className="text-sm font-medium hover:underline dark:text-text-dark dark:hover:text-purple-400">
-                {post.author ? (post.author.full_name || post.author.username) : (post.author_id ? post.author_name || 'Amogh' : 'Amogh')}
+              <a href={`/user/${post.author && post.author.username ? post.author.username : ''}`} className="text-sm font-medium hover:underline dark:text-text-dark dark:hover:text-purple-400">
+                {post.author ? (post.author.full_name || post.author.username || 'Anonymous') : (post.author_id ? 'Author' : 'Anonymous')}
               </a>
               <p className="text-xs text-text-muted dark:text-text-dark-muted">
-                {new Date(post.created_at).toLocaleDateString('en-US', {
+                {post.created_at ? new Date(post.created_at).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric'
-                })}
+                }) : 'Unknown date'}
               </p>
             </div>
           </div>
@@ -498,24 +503,29 @@ export default function ClientBlogPost({ slug }) {
             {post.author && post.author.avatar_url ? (
               <img
                 src={post.author.avatar_url}
-                alt={post.author && (post.author.full_name || post.author.username)}
+                alt={(post.author && (post.author.full_name || post.author.username)) || 'Author'}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '/images/placeholder-profile.svg';
+                  console.log('Author avatar failed to load, using placeholder');
+                }}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-purple-600 text-white text-xl font-bold">
-                {post.author ? (post.author.username?.charAt(0).toUpperCase() || 'A') : 'A'}
+                {post.author && post.author.username ? post.author.username.charAt(0).toUpperCase() : 'A'}
               </div>
             )}
           </div>
           <div className="ml-4">
             <h3 className="text-xl font-semibold dark:text-white">
-              <a href={post.author ? `/user/${post.author.username}` : '#'} className="hover:underline hover:text-purple-500">
-                {post.author ? (post.author.full_name || post.author.username) :
-                  (post.author_id ? post.author_name || 'Amogh' : 'Amogh')}
+              <a href={post.author && post.author.username ? `/user/${post.author.username}` : '#'} className="hover:underline hover:text-purple-500">
+                {post.author ? (post.author.full_name || post.author.username || 'Anonymous') :
+                  (post.author_id ? post.author_name || 'Author' : 'Anonymous')}
               </a>
             </h3>
             {post.author && post.author.bio && <p className="text-text-muted dark:text-gray-400 mt-1">{post.author.bio}</p>}
-            {post.author && (
+            {post.author && post.author.username && (
               <a href={`/user/${post.author.username}`} className="text-purple-500 hover:underline text-sm mt-2 inline-block">
                 View Profile
               </a>
