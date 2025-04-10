@@ -1,8 +1,16 @@
 import postService from '../../../services/postService';
 import authService from '../../../services/authService';
+import initDatabase from '../../../db/init';
 
 // Get all posts with pagination
 export async function get({ request, url }) {
+  // Initialize database if tables don't exist
+  try {
+    await initDatabase();
+  } catch (error) {
+    console.error('Error initializing database:', error);
+    // Continue with the request even if initialization fails
+  }
   try {
     // Parse query parameters
     const page = parseInt(url.searchParams.get('page') || '1');
@@ -26,20 +34,20 @@ export async function get({ request, url }) {
 
     return new Response(
       JSON.stringify(result),
-      { 
+      {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       }
     );
   } catch (error) {
     console.error('Error in get posts API:', error);
-    
+
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: 'An unexpected error occurred' 
+      JSON.stringify({
+        success: false,
+        error: 'An unexpected error occurred'
       }),
-      { 
+      {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       }
@@ -49,17 +57,24 @@ export async function get({ request, url }) {
 
 // Create a new post
 export async function post({ request }) {
+  // Initialize database if tables don't exist
+  try {
+    await initDatabase();
+  } catch (error) {
+    console.error('Error initializing database:', error);
+    // Continue with the request even if initialization fails
+  }
   try {
     // Get the authorization header
     const authHeader = request.headers.get('Authorization');
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Unauthorized' 
+        JSON.stringify({
+          success: false,
+          error: 'Unauthorized'
         }),
-        { 
+        {
           status: 401,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -68,17 +83,17 @@ export async function post({ request }) {
 
     // Extract the token
     const token = authHeader.split(' ')[1];
-    
+
     // Verify the token and get the user
     const user = await authService.verifyToken(token);
-    
+
     if (!user) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Invalid or expired token' 
+        JSON.stringify({
+          success: false,
+          error: 'Invalid or expired token'
         }),
-        { 
+        {
           status: 401,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -87,25 +102,25 @@ export async function post({ request }) {
 
     // Parse request body
     const data = await request.json();
-    const { 
-      title, 
-      content, 
-      excerpt, 
-      cover_image, 
-      categoryIds, 
-      tagIds, 
-      status, 
-      scheduled_publish_date 
+    const {
+      title,
+      content,
+      excerpt,
+      cover_image,
+      categoryIds,
+      tagIds,
+      status,
+      scheduled_publish_date
     } = data;
 
     // Validate required fields
     if (!title || !content) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Title and content are required' 
+        JSON.stringify({
+          success: false,
+          error: 'Title and content are required'
         }),
-        { 
+        {
           status: 400,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -127,11 +142,11 @@ export async function post({ request }) {
 
     if (!post) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Failed to create post' 
+        JSON.stringify({
+          success: false,
+          error: 'Failed to create post'
         }),
-        { 
+        {
           status: 500,
           headers: { 'Content-Type': 'application/json' }
         }
@@ -139,24 +154,24 @@ export async function post({ request }) {
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         post
       }),
-      { 
+      {
         status: 201,
         headers: { 'Content-Type': 'application/json' }
       }
     );
   } catch (error) {
     console.error('Error in create post API:', error);
-    
+
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: 'An unexpected error occurred' 
+      JSON.stringify({
+        success: false,
+        error: 'An unexpected error occurred'
       }),
-      { 
+      {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       }

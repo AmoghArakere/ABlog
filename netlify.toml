@@ -4,6 +4,8 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  DATABASE_URL = "postgresql://neondb_owner:npg_GPnTNBx0V7ZA@ep-dry-dew-a1gjtzo2-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
+  JWT_SECRET = "your-secret-key-change-this-in-netlify-dashboard"
 
 [dev]
   command = "npm run dev"
