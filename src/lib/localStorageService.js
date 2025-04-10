@@ -514,19 +514,23 @@ export const profileService = {
         cover_image: cover_image ? (typeof cover_image === 'string' ? `${cover_image.substring(0, 30)}...` : '[non-string value]') : null
       });
 
-      const users = JSON.parse(getFromStorage('users'));
-      const userIndex = users.findIndex(user => user.id === userId);
-
-      if (userIndex === -1) {
-        console.error('User not found:', userId);
+      // Get the current user from localStorage
+      const currentUserJson = getFromStorage('currentUser');
+      if (!currentUserJson) {
+        console.error('No current user found in localStorage');
         return null;
       }
 
-      const user = users[userIndex];
-      console.log('Found user:', user.username);
+      const currentUser = JSON.parse(currentUserJson);
+      if (currentUser.id !== userId) {
+        console.error('User ID mismatch:', currentUser.id, userId);
+        return null;
+      }
+
+      console.log('Found current user:', currentUser.username);
 
       // Username cannot be changed - always use the existing username
-      username = user.username;
+      username = currentUser.username;
       console.log('Using existing username:', username);
 
       // Use the image URLs directly (they should already be Cloudinary URLs from the frontend)
@@ -545,42 +549,39 @@ export const profileService = {
         processedCoverImage = cover_image;
       }
 
+      // Create updated user object
+      const updatedUser = { ...currentUser };
+
       // Update user fields - only update fields that were provided
-      if (username) user.username = username;
-      if (full_name) user.full_name = full_name;
-      if (bio !== undefined) user.bio = bio;
-      if (processedAvatarUrl) user.avatar_url = processedAvatarUrl; // Only update if new avatar was provided
-      if (processedCoverImage) user.cover_image = processedCoverImage; // Only update if new cover was provided
-      if (website !== undefined) user.website = website;
-      if (location !== undefined) user.location = location;
+      if (username) updatedUser.username = username;
+      if (full_name) updatedUser.full_name = full_name;
+      if (bio !== undefined) updatedUser.bio = bio;
+      if (processedAvatarUrl) updatedUser.avatar_url = processedAvatarUrl; // Only update if new avatar was provided
+      if (processedCoverImage) updatedUser.cover_image = processedCoverImage; // Only update if new cover was provided
+      if (website !== undefined) updatedUser.website = website;
+      if (location !== undefined) updatedUser.location = location;
 
-      users[userIndex] = user;
-      setToStorage('users', JSON.stringify(users));
+      // Save the updated user to localStorage
+      console.log('Saving updated user:', updatedUser.username);
+      setToStorage('currentUser', JSON.stringify(updatedUser));
 
-      // Also update the currentUser in localStorage if it's the same user
-      const currentUser = JSON.parse(getFromStorage('currentUser'));
-      if (currentUser && currentUser.id === userId) {
-        console.log('Updating currentUser in localStorage');
-        const updatedCurrentUser = { ...currentUser };
-
-        // Username cannot be changed - ensure currentUser has the correct username
-        if (!updatedCurrentUser.username || updatedCurrentUser.username !== user.username) {
-          console.log('Ensuring currentUser has correct username:', user.username);
-          updatedCurrentUser.username = user.username;
+      // Try to update the users array if it exists
+      try {
+        const usersJson = getFromStorage('users');
+        if (usersJson) {
+          const users = JSON.parse(usersJson);
+          const userIndex = users.findIndex(user => user.id === userId);
+          if (userIndex !== -1) {
+            users[userIndex] = updatedUser;
+            setToStorage('users', JSON.stringify(users));
+          }
         }
-
-        if (full_name) updatedCurrentUser.full_name = full_name;
-        if (bio !== undefined) updatedCurrentUser.bio = bio;
-        if (processedAvatarUrl) updatedCurrentUser.avatar_url = processedAvatarUrl; // Only update if new avatar was provided
-        if (processedCoverImage) updatedCurrentUser.cover_image = processedCoverImage; // Only update if new cover was provided
-        if (website !== undefined) updatedCurrentUser.website = website;
-        if (location !== undefined) updatedCurrentUser.location = location;
-
-        console.log('Saving updated currentUser:', updatedCurrentUser.username);
-        setToStorage('currentUser', JSON.stringify(updatedCurrentUser));
+      } catch (err) {
+        console.error('Error updating users array:', err);
+        // Continue even if this fails
       }
 
-      return user;
+      return updatedUser;
     } catch (error) {
       console.error('Error updating profile:', error);
       throw error;

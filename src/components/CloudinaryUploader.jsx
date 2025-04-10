@@ -63,8 +63,8 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
       // Create a unique widget instance for this component
       cloudinaryWidget.current = window.cloudinary.createUploadWidget(
         {
-          cloudName: import.meta.env.PUBLIC_CLOUDINARY_CLOUD_NAME || 'dvrnheiru',
-          uploadPreset: import.meta.env.PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ablog_upload',
+          cloudName: 'dvrnheiru', // Hardcoded for now
+          uploadPreset: 'ablog_upload', // Hardcoded for now
           sources: ['local', 'url', 'camera'],
           multiple: false,
           cropping: true,
@@ -123,7 +123,7 @@ export default function CloudinaryUploader({ onImageSelect, buttonText = "Upload
               document.body.removeAttribute('data-active-uploader');
             }
           } else {
-            console.log(`Ignoring callback for inactive uploader ${thisUploader}`);
+            console.log(`Ignoring callback for inactive uploader ${uploaderId}`);
           }
         }
       );
